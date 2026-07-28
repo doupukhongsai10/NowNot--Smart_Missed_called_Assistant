@@ -17,8 +17,8 @@ const GROUPS = [
     badgeColor: '#F472B6',
   },
   {
-    key: 'Friends',
-    icon: '🖥️',
+    key: 'Friends & Relatives',
+    icon: '👥',
     color: '#38BDF8',
     borderColor: 'rgba(56,189,248,0.45)',
     bgColor: 'rgba(56,189,248,0.06)',
@@ -395,10 +395,21 @@ function GroupCard({ group, message, updatedAt, onEdit, onTest }) {
 export default function Messages() {
   const { activeStatus } = useActiveStatus();
 
-  const loadData = () => messageStore.getGlobal();
-  const [data, setData] = useState(loadData);
+  const [data, setData] = useState(() => messageStore.getGlobal());
   const [editingGroup, setEditingGroup] = useState(null); // group config object
   const [testGroup, setTestGroup] = useState(null);       // { group, message }
+
+  React.useEffect(() => {
+    if (activeStatus && activeStatus.statusId) {
+      const activeMsgs = messageStore.getForStatus(activeStatus.statusId);
+      setData({
+        messages: activeMsgs,
+        updatedAt: messageStore.getGlobal().updatedAt,
+      });
+    } else {
+      setData(messageStore.getGlobal());
+    }
+  }, [activeStatus]);
 
   const handleSave = useCallback((groupKey, text) => {
     const updated = messageStore.saveGlobal(groupKey, text);

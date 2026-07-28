@@ -75,12 +75,35 @@ export default function Dashboard({ onNavigate }) {
             />
 
             <div className="relative z-10 flex flex-col gap-2">
-              <span
-                className="text-xs font-semibold uppercase tracking-widest"
-                style={{ color: 'rgba(210,187,255,0.65)', fontFamily: "'Inter', sans-serif", letterSpacing: '0.1em' }}
-              >
-                Current Status
-              </span>
+              <div className="flex items-center justify-between">
+                <span
+                  className="text-xs font-semibold uppercase tracking-widest"
+                  style={{ color: 'rgba(210,187,255,0.65)', fontFamily: "'Inter', sans-serif", letterSpacing: '0.1em' }}
+                >
+                  Current Status
+                </span>
+
+                <button
+                  onClick={() => {
+                    const statusDef = statusStore.getById(activeStatus.statusId) || {
+                      id: activeStatus.statusId,
+                      name: activeStatus.statusName,
+                      emoji: activeStatus.statusEmoji,
+                    };
+                    onNavigate('create-status', statusDef);
+                  }}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold cursor-pointer transition-all active:scale-95"
+                  style={{
+                    background: 'rgba(210,187,255,0.12)',
+                    border: '1px solid rgba(210,187,255,0.25)',
+                    color: '#d2bbff',
+                  }}
+                  title="Edit Status & Messages"
+                >
+                  <span className="material-symbols-outlined text-base">edit_note</span>
+                  Edit
+                </button>
+              </div>
 
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-3xl">{activeStatus.detail?.emoji || activeStatus.statusEmoji || '⚡'}</span>

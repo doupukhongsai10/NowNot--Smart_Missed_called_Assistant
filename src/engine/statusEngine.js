@@ -81,10 +81,29 @@ function activate(statusId, durationMinutes, source = 'manual') {
   };
 }
 
+/**
+ * Updates active status metadata (name, emoji) if current active status matches statusId.
+ */
+function updateActiveMetadata(statusId, statusName, statusEmoji) {
+  try {
+    const raw = localStorage.getItem(ACTIVE_KEY);
+    if (!raw) return;
+    const active = JSON.parse(raw);
+    if (active && active.statusId === statusId) {
+      active.statusName = statusName;
+      active.statusEmoji = statusEmoji;
+      localStorage.setItem(ACTIVE_KEY, JSON.stringify(active));
+    }
+  } catch {
+    // ignore
+  }
+}
+
 const statusEngine = {
   getActive,
   activate,
   deactivate,
+  updateActiveMetadata,
 };
 
 export default statusEngine;

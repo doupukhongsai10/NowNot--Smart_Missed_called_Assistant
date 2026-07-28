@@ -1,16 +1,19 @@
+import statusEngine from '../engine/statusEngine';
+
+const KEY = 'nn_messages';
 const GLOBAL_KEY = 'nn_messages_global';
 
 export const DEFAULT_MESSAGES = {
   Family: "Hey! I'm currently focused. If it's urgent, please call twice. I'll get back to you soon. ❤️",
+  'Friends & Relatives': "I'm currently in a flow state. Text #URGENT if you need me now, otherwise catch you later! 🚀",
   Work: 'I am currently in a meeting and not checking messages. For immediate assistance, please contact the support desk.',
-  Friends: "I'm currently in a flow state. Text #URGENT if you need me now, otherwise catch you later! 🚀",
   Unknown: 'The recipient is currently unavailable. Your message has been logged and will be seen once they are back online.',
 };
 
 export const DEFAULT_UPDATED_AT = {
   Family: Date.now() - 2 * 60 * 60 * 1000,    // 2h ago
+  'Friends & Relatives': Date.now() - 24 * 60 * 60 * 1000,  // 1d ago
   Work: Date.now() - 3 * 60 * 60 * 1000,      // 3h ago
-  Friends: Date.now() - 24 * 60 * 60 * 1000,  // 1d ago
   Unknown: Date.now() - 7 * 24 * 60 * 60 * 1000, // 1w ago
 };
 
@@ -74,7 +77,11 @@ function getGlobal() {
   try {
     const raw = localStorage.getItem(GLOBAL_KEY);
     if (!raw) return { messages: { ...DEFAULT_MESSAGES }, updatedAt: { ...DEFAULT_UPDATED_AT } };
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return {
+      messages: { ...DEFAULT_MESSAGES, ...(parsed.messages || {}) },
+      updatedAt: { ...DEFAULT_UPDATED_AT, ...(parsed.updatedAt || {}) },
+    };
   } catch {
     return { messages: { ...DEFAULT_MESSAGES }, updatedAt: { ...DEFAULT_UPDATED_AT } };
   }
@@ -96,6 +103,43 @@ function saveGlobal(group, text) {
   } catch {
     // ignore
   }
+
+  // Also update active status messages if running
+  const active = statusEngine.getActive();
+  if (active && active.statusId) {
+    saveForStatus(active.statusId, { [group]: text });
+  }
+
+  return updated;
+}
+
+/**
+ * Saves all group messages at once globally.
+ * @param {Object} messagesObj - { Family, Work, Friends, Unknown }
+ */
+function saveGlobalAll(messagesObj) {
+  const current = getGlobal();
+  const now = Date.now();
+  const updatedMsgs = { ...current.messages, ...messagesObj };
+  const updatedTimes = { ...current.updatedAt };
+
+  Object.keys(messagesObj).forEach((grp) => {
+    if (messagesObj[grp]) {
+      updatedTimes[grp] = now;
+    }
+  });
+
+  const updated = {
+    messages: updatedMsgs,
+    updatedAt: updatedTimes,
+  };
+
+  try {
+    localStorage.setItem(GLOBAL_KEY, JSON.stringify(updated));
+  } catch {
+    // ignore
+  }
+
   return updated;
 }
 
@@ -106,6 +150,7 @@ const messageStore = {
   saveForStatus,
   getGlobal,
   saveGlobal,
+  saveGlobalAll,
 };
 
 export default messageStore;

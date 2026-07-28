@@ -100,8 +100,10 @@ export default function App() {
         {renderPage()}
       </main>
 
-      {/* Bottom Nav Bar */}
-      <BottomNav activePage={navActiveTab} onNavigate={navigateTo} />
+      {/* Bottom Nav Bar (hidden on create-status page for full screen modal view) */}
+      {activePage !== 'create-status' && (
+        <BottomNav activePage={navActiveTab} onNavigate={navigateTo} />
+      )}
     </div>
   );
 }

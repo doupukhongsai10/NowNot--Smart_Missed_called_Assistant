@@ -9,7 +9,7 @@ const GROUP_CONFIG = {
     border: 'rgba(244,114,182,0.5)',
     accentBorder: '#F472B6',
   },
-  Friends: {
+  'Friends & Relatives': {
     color: '#38BDF8',
     bg: 'rgba(56,189,248,0.15)',
     border: 'rgba(56,189,248,0.5)',
@@ -29,7 +29,7 @@ const GROUP_CONFIG = {
   },
 };
 
-const FILTER_TABS = ['All', 'Family', 'Friends', 'Work', 'Unknown'];
+const FILTER_TABS = ['All', 'Family', 'Friends & Relatives', 'Work', 'Unknown'];
 
 // ── Sample Data ────────────────────────────────────────────────────────────────
 
@@ -79,7 +79,7 @@ const SAMPLE_LOGS = [
     id: '4',
     name: 'Alex Chen',
     number: null,
-    group: 'Friends',
+    group: 'Friends & Relatives',
     timestamp: Date.now() - 25 * 60 * 60 * 1000 - 20 * 60 * 1000,
     displayTime: '18:40',
     displayDate: 'Yesterday',

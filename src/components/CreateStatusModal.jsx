@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import statusStore from '../store/statusStore';
 import messageStore, { DEFAULT_MESSAGES } from '../store/messageStore';
+import statusEngine from '../engine/statusEngine';
 
 const EMOJI_OPTIONS = ['🧘', '😴', '💼', '📚', '🚗', '💪', '🚫', '🎯', '🌴', '🎧', '🎮', '✈️'];
 
@@ -35,8 +36,10 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
     const rawMins = toMins(endTime) - toMins(startTime);
     const durationMinutes = rawMins > 0 ? rawMins : 60;
 
-    const savedStatus = statusStore.save({
-      id: initialStatus?.id,
+    const targetStatusId = initialStatus?.id || `status-${crypto.randomUUID()}`;
+
+    statusStore.save({
+      id: targetStatusId,
       name: name.trim(),
       emoji,
       defaultDurationMinutes: durationMinutes,
@@ -46,8 +49,14 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
       manualOnly,
     });
 
-    // Save group messages for this status
-    messageStore.saveForStatus(savedStatus.id || savedStatus[0]?.id, messages);
+    // Save group messages for this specific status
+    messageStore.saveForStatus(targetStatusId, messages);
+
+    // Also update global group messages so they display immediately on the Messages page
+    messageStore.saveGlobalAll(messages);
+
+    // Sync active status metadata if currently running
+    statusEngine.updateActiveMetadata(targetStatusId, name.trim(), emoji);
 
     onSave();
     onClose();
@@ -189,13 +198,37 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
             </div>
             {editingGroup === 'Family' ? (
               <textarea
-                value={messages.Family}
+                value={messages.Family || ''}
                 onChange={(e) => handleMessageChange('Family', e.target.value)}
                 rows={2}
                 className="w-full p-2 text-xs bg-bg-surface border border-group-family/40 rounded-xl text-on-surface focus:outline-none"
               />
             ) : (
-              <p className="text-xs text-on-surface-variant italic">"{messages.Family}"</p>
+              <p className="text-xs text-on-surface-variant italic">"{messages.Family || 'No message set'}"</p>
+            )}
+          </div>
+
+          {/* FRIENDS & RELATIVES */}
+          <div className="glass-card p-4 border border-group-friends/50 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold tracking-wider uppercase text-group-friends">FRIENDS & RELATIVES</span>
+              <button
+                type="button"
+                onClick={() => setEditingGroup(editingGroup === 'Friends & Relatives' ? null : 'Friends & Relatives')}
+                className="text-outline-variant hover:text-group-friends transition-colors"
+              >
+                <span className="material-symbols-outlined text-lg">edit_note</span>
+              </button>
+            </div>
+            {editingGroup === 'Friends & Relatives' ? (
+              <textarea
+                value={messages['Friends & Relatives'] || messages.Friends || ''}
+                onChange={(e) => handleMessageChange('Friends & Relatives', e.target.value)}
+                rows={2}
+                className="w-full p-2 text-xs bg-bg-surface border border-group-friends/40 rounded-xl text-on-surface focus:outline-none"
+              />
+            ) : (
+              <p className="text-xs text-on-surface-variant italic">"{messages['Friends & Relatives'] || messages.Friends || 'No message set'}"</p>
             )}
           </div>
 
@@ -213,37 +246,13 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
             </div>
             {editingGroup === 'Work' ? (
               <textarea
-                value={messages.Work}
+                value={messages.Work || ''}
                 onChange={(e) => handleMessageChange('Work', e.target.value)}
                 rows={2}
                 className="w-full p-2 text-xs bg-bg-surface border border-group-work/40 rounded-xl text-on-surface focus:outline-none"
               />
             ) : (
-              <p className="text-xs text-on-surface-variant italic">"{messages.Work}"</p>
-            )}
-          </div>
-
-          {/* FRIENDS */}
-          <div className="glass-card p-4 border border-group-friends/50 space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold tracking-wider uppercase text-group-friends">FRIENDS</span>
-              <button
-                type="button"
-                onClick={() => setEditingGroup(editingGroup === 'Friends' ? null : 'Friends')}
-                className="text-outline-variant hover:text-group-friends transition-colors"
-              >
-                <span className="material-symbols-outlined text-lg">edit_note</span>
-              </button>
-            </div>
-            {editingGroup === 'Friends' ? (
-              <textarea
-                value={messages.Friends}
-                onChange={(e) => handleMessageChange('Friends', e.target.value)}
-                rows={2}
-                className="w-full p-2 text-xs bg-bg-surface border border-group-friends/40 rounded-xl text-on-surface focus:outline-none"
-              />
-            ) : (
-              <p className="text-xs text-on-surface-variant italic">"{messages.Friends}"</p>
+              <p className="text-xs text-on-surface-variant italic">"{messages.Work || 'No message set'}"</p>
             )}
           </div>
 
@@ -261,13 +270,13 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
             </div>
             {editingGroup === 'Unknown' ? (
               <textarea
-                value={messages.Unknown}
+                value={messages.Unknown || ''}
                 onChange={(e) => handleMessageChange('Unknown', e.target.value)}
                 rows={2}
                 className="w-full p-2 text-xs bg-bg-surface border border-group-unknown/40 rounded-xl text-on-surface focus:outline-none"
               />
             ) : (
-              <p className="text-xs text-on-surface-variant italic">"{messages.Unknown}"</p>
+              <p className="text-xs text-on-surface-variant italic">"{messages.Unknown || 'No message set'}"</p>
             )}
           </div>
         </div>

@@ -119,6 +119,8 @@ function RoutineModal({ initial, onClose, onSave }) {
     name: '',
     emoji: '⏰',
     statusId: allStatuses[0]?.id || '',
+    customStatusName: '',
+    customMessage: '',
     startTime: '09:00',
     endTime: '17:00',
     days: [1, 2, 3, 4, 5],
@@ -126,6 +128,7 @@ function RoutineModal({ initial, onClose, onSave }) {
     ...initial,
   });
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const isOther = form.statusId === '__other__';
 
   const QUICK_EMOJIS = ['⏰', '🧘', '💼', '📚', '🚗', '💪', '🏠', '🌙', '🎯', '🔕', '🎮', '🍽️'];
 
@@ -139,6 +142,7 @@ function RoutineModal({ initial, onClose, onSave }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
+    if (isOther && !form.customStatusName.trim()) return;
     onSave({ ...form, id: initial?.id });
   };
 
@@ -149,15 +153,18 @@ function RoutineModal({ initial, onClose, onSave }) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="w-full max-w-[480px] rounded-t-3xl p-6 pb-10 space-y-5"
+        className="w-full max-w-[480px] rounded-t-3xl flex flex-col"
         style={{
           background: 'linear-gradient(180deg, #1E2240 0%, #12131a 100%)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderBottom: 'none',
-          maxHeight: '92dvh',
-          overflowY: 'auto',
+          maxHeight: 'calc(92dvh - 72px)',
+          marginBottom: '72px',
         }}
       >
+        {/* Scrollable content area */}
+        <div className="overflow-y-auto flex-1 p-6 space-y-5">
+
         {/* Handle */}
         <div className="flex justify-center -mt-1 mb-1">
           <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
@@ -176,7 +183,7 @@ function RoutineModal({ initial, onClose, onSave }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form id="routine-form" onSubmit={handleSubmit} className="space-y-5">
           {/* Name + Emoji */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(210,187,255,0.55)', fontFamily: "'Inter',sans-serif" }}>
@@ -236,23 +243,87 @@ function RoutineModal({ initial, onClose, onSave }) {
             <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(210,187,255,0.55)', fontFamily: "'Inter',sans-serif" }}>
               Status to Activate
             </label>
-            <select
-              value={form.statusId}
-              onChange={(e) => setForm((f) => ({ ...f, statusId: e.target.value }))}
-              className="w-full px-4 py-3 rounded-xl text-sm font-medium outline-none appearance-none cursor-pointer"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#e3e1ec',
-                fontFamily: "'Inter',sans-serif",
-              }}
-            >
-              {allStatuses.map((s) => (
-                <option key={s.id} value={s.id} style={{ background: '#1e1f27' }}>
-                  {s.emoji} {s.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={form.statusId}
+                onChange={(e) => setForm((f) => ({ ...f, statusId: e.target.value, customStatusName: '', customMessage: '' }))}
+                className="w-full px-4 py-3 rounded-xl text-sm font-medium outline-none appearance-none cursor-pointer pr-10"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${isOther ? 'rgba(245,158,11,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                  color: '#e3e1ec',
+                  fontFamily: "'Inter',sans-serif",
+                }}
+              >
+                {allStatuses.map((s) => (
+                  <option key={s.id} value={s.id} style={{ background: '#1e1f27' }}>
+                    {s.emoji} {s.name}
+                  </option>
+                ))}
+                <option value="__other__" style={{ background: '#1e1f27' }}>✏️ Other (write your own)</option>
+              </select>
+              {/* Chevron icon */}
+              <span
+                className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-base pointer-events-none"
+                style={{ color: isOther ? '#F59E0B' : 'rgba(210,187,255,0.4)' }}
+              >
+                expand_more
+              </span>
+            </div>
+
+            {/* Custom fields — shown only when "Other" is selected */}
+            {isOther && (
+              <div className="space-y-3 mt-1">
+                {/* Custom status name */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(245,158,11,0.7)', fontFamily: "'Inter',sans-serif" }}>
+                    Custom Status Name
+                  </label>
+                  <input
+                    type="text"
+                    value={form.customStatusName}
+                    onChange={(e) => setForm((f) => ({ ...f, customStatusName: e.target.value }))}
+                    placeholder="e.g. Power Nap, Deep Work…"
+                    required={isOther}
+                    className="w-full px-4 py-3 rounded-xl text-sm font-medium outline-none placeholder:text-outline-variant"
+                    style={{
+                      background: 'rgba(245,158,11,0.06)',
+                      border: '1px solid rgba(245,158,11,0.25)',
+                      color: '#e3e1ec',
+                      fontFamily: "'Inter',sans-serif",
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = 'rgba(245,158,11,0.55)')}
+                    onBlur={(e) => (e.target.style.borderColor = 'rgba(245,158,11,0.25)')}
+                  />
+                </div>
+
+                {/* Custom auto-reply message */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(245,158,11,0.7)', fontFamily: "'Inter',sans-serif" }}>
+                    Auto-Reply Message
+                  </label>
+                  <textarea
+                    value={form.customMessage}
+                    onChange={(e) => setForm((f) => ({ ...f, customMessage: e.target.value }))}
+                    placeholder="e.g. I'm taking a quick break and will be back in 30 mins."
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl text-sm outline-none placeholder:text-outline-variant resize-none"
+                    style={{
+                      background: 'rgba(245,158,11,0.06)',
+                      border: '1px solid rgba(245,158,11,0.25)',
+                      color: '#e3e1ec',
+                      fontFamily: "'Inter',sans-serif",
+                      lineHeight: '1.6',
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = 'rgba(245,158,11,0.55)')}
+                    onBlur={(e) => (e.target.style.borderColor = 'rgba(245,158,11,0.25)')}
+                  />
+                  <p className="text-[10px]" style={{ color: 'rgba(245,158,11,0.5)', fontFamily: "'Inter',sans-serif" }}>
+                    Sent to all callers while this routine is active.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Time range */}
@@ -309,9 +380,19 @@ function RoutineModal({ initial, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Submit */}
+          {/* Day spacing at bottom of scroll area */}
+          <div className="h-1" />
+        </form>
+        </div>
+
+        {/* Sticky submit button — always visible at bottom */}
+        <div
+          className="flex-shrink-0 px-6 pb-5 pt-3"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(18,19,26,0.9)' }}
+        >
           <button
             type="submit"
+            form="routine-form"
             className="w-full py-3.5 rounded-2xl text-sm font-bold tracking-wide cursor-pointer transition-all active:scale-95"
             style={{
               background: 'var(--gradient-primary)',
@@ -322,7 +403,7 @@ function RoutineModal({ initial, onClose, onSave }) {
           >
             {initial ? 'Save Changes' : 'Create Routine'}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

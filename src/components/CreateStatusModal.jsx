@@ -10,8 +10,8 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Time window
-  const [startTime, setStartTime] = useState('09:00 AM');
-  const [endTime, setEndTime] = useState('11:30 AM');
+  const [startTime, setStartTime] = useState(initialStatus?.startTime || '09:00');
+  const [endTime, setEndTime] = useState(initialStatus?.endTime || '11:30');
 
   // Group messages
   const existingMessages = initialStatus ? messageStore.getForStatus(initialStatus.id) : DEFAULT_MESSAGES;
@@ -30,12 +30,16 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
     e.preventDefault();
     if (!name.trim()) return;
 
-    // Calculate duration from start/end time roughly or default to 150 mins (2.5h)
+    // Calculate duration from start/end time
+    const toMins = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const rawMins = toMins(endTime) - toMins(startTime);
+    const durationMinutes = rawMins > 0 ? rawMins : 60;
+
     const savedStatus = statusStore.save({
       id: initialStatus?.id,
       name: name.trim(),
       emoji,
-      defaultDurationMinutes: 150,
+      defaultDurationMinutes: durationMinutes,
       startTime,
       endTime,
       locationTrigger,
@@ -140,28 +144,28 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
             {/* Start Time */}
             <div className="bg-bg-surface/80 border border-white/10 rounded-2xl p-3 flex flex-col gap-1">
               <span className="text-[10px] font-semibold tracking-wider text-outline-variant">START</span>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1">
                 <input
-                  type="text"
+                  type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="bg-transparent font-mono text-sm font-bold text-on-surface focus:outline-none w-full"
+                  className="bg-transparent font-mono text-sm font-bold text-on-surface focus:outline-none w-full cursor-pointer"
+                  style={{ colorScheme: 'dark' }}
                 />
-                <span className="material-symbols-outlined text-sm text-outline-variant">schedule</span>
               </div>
             </div>
 
             {/* End Time */}
             <div className="bg-bg-surface/80 border border-white/10 rounded-2xl p-3 flex flex-col gap-1">
               <span className="text-[10px] font-semibold tracking-wider text-outline-variant">END</span>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-1">
                 <input
-                  type="text"
+                  type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="bg-transparent font-mono text-sm font-bold text-on-surface focus:outline-none w-full"
+                  className="bg-transparent font-mono text-sm font-bold text-on-surface focus:outline-none w-full cursor-pointer"
+                  style={{ colorScheme: 'dark' }}
                 />
-                <span className="material-symbols-outlined text-sm text-outline-variant">schedule</span>
               </div>
             </div>
           </div>

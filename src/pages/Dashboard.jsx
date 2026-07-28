@@ -128,6 +128,25 @@ export default function Dashboard({ onNavigate }) {
                 </button>
               </div>
 
+              {/* Quick duration adjuster on active card */}
+              <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-2 text-xs">
+                <span className="text-[10px] uppercase tracking-widest" style={{ color: 'rgba(210,187,255,0.5)', fontFamily: "'Inter', sans-serif" }}>
+                  Adjust:
+                </span>
+                <div className="flex items-center gap-1.5 overflow-x-auto">
+                  {[30, 60, 120, 240, 480].map((mins) => (
+                    <button
+                      key={mins}
+                      onClick={() => activate(activeStatus.statusId, mins, 'manual')}
+                      className="px-2 py-0.5 rounded-md text-[11px] font-medium transition-all active:scale-95 cursor-pointer bg-white/5 border border-white/10 text-outline-variant hover:text-primary hover:bg-primary/20 hover:border-primary/40"
+                      title={`Reset active duration to ${mins >= 60 ? `${mins / 60}h` : `${mins}m`}`}
+                    >
+                      {mins >= 60 ? `${mins / 60}h` : `${mins}m`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <p className="mt-3 text-xs flex items-center gap-1" style={{ color: 'rgba(210,187,255,0.50)', fontFamily: "'Inter', sans-serif" }}>
                 <span className="material-symbols-outlined icon-filled text-xs">auto_awesome</span>
                 Auto-replying to missed calls
@@ -173,19 +192,19 @@ export default function Dashboard({ onNavigate }) {
             );
           })}
 
-          {/* Add Schedule Button with requested background color oklch(52.7% 0.154 150.069) */}
+          {/* Set Status Button */}
           <button
-            onClick={() => onNavigate('scheduler')}
+            onClick={() => onNavigate('create-status')}
             className="bento-btn p-4 flex flex-col items-center justify-center gap-2 cursor-pointer rounded-xl border border-white/20 text-white transition-all active:scale-95 shadow-md"
             style={{
               background: 'oklch(52.7% 0.154 150.069)',
             }}
           >
             <span className="material-symbols-outlined text-2xl font-bold">
-              calendar_add_on
+              add_circle
             </span>
             <span className="text-xs font-semibold tracking-tight text-center leading-tight">
-              Add Schedule
+              Set Status
             </span>
           </button>
         </div>

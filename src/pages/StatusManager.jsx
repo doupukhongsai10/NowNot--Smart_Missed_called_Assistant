@@ -151,25 +151,22 @@ export default function StatusManager({ onNavigate }) {
                 </div>
               </div>
 
-              {/* Duration selector pill options */}
-              {!isActiveThis && (
-                <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2 text-xs">
-                  <span className="text-[10px] text-outline-variant uppercase">Duration:</span>
-                  {[30, 60, 120, 240, 480].map((mins) => (
-                    <button
-                      key={mins}
-                      onClick={() => setDurationForStatus(status.id, mins)}
-                      className={`px-2 py-0.5 rounded-md text-[11px] transition-colors cursor-pointer ${
-                        currentDur === mins
-                          ? 'bg-primary/20 text-primary border border-primary/40'
-                          : 'text-outline-variant hover:text-on-surface'
-                      }`}
-                    >
-                      {mins >= 60 ? `${mins / 60}h` : `${mins}m`}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {/* Quick Duration pill options (available anytime, including during active sessions) */}
+              <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2 text-xs">
+                <span className="text-[10px] text-outline-variant uppercase font-medium">
+                  {isActiveThis ? 'Set Active Duration:' : 'Quick Activate:'}
+                </span>
+                {[30, 60, 120, 240, 480].map((mins) => (
+                  <button
+                    key={mins}
+                    onClick={() => activate(status.id, mins, 'manual')}
+                    className="px-2 py-0.5 rounded-md text-[11px] font-medium transition-all active:scale-95 cursor-pointer bg-white/5 border border-white/10 text-outline-variant hover:text-primary hover:bg-primary/15 hover:border-primary/40"
+                    title={isActiveThis ? `Reset active duration to ${mins >= 60 ? `${mins / 60}h` : `${mins}m`}` : `Activate for ${mins >= 60 ? `${mins / 60} hour(s)` : `${mins} mins`}`}
+                  >
+                    {mins >= 60 ? `${mins / 60}h` : `${mins}m`}
+                  </button>
+                ))}
+              </div>
             </div>
           );
         })}

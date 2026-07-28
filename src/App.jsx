@@ -8,11 +8,20 @@ import Messages from './pages/Messages';
 import CallLog from './pages/CallLog';
 import Settings from './pages/Settings';
 import CreateStatusModal from './components/CreateStatusModal';
+import useActiveStatus from './hooks/useActiveStatus';
+import useScheduler from './hooks/useScheduler';
 
 export default function App() {
   const [activePage, setActivePage] = useState('dashboard');
   const [pageHistory, setPageHistory] = useState(['dashboard']);
   const [editingStatus, setEditingStatus] = useState(null);
+
+  // Active status — used by scheduler callback to trigger a re-render
+  const { refreshActiveStatus } = useActiveStatus();
+
+  // Mount the 60-second scheduler tick loop for the lifetime of the app.
+  // Whenever it activates or deactivates a scheduled status, refresh UI state.
+  useScheduler({ onStatusChange: refreshActiveStatus });
 
   const navigateTo = (page, data = null) => {
     if (page === activePage && !data) return;

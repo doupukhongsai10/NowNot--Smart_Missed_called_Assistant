@@ -1,0 +1,45 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,jsx}'],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'bg-void': '#07080F',
+        'bg-base': '#0B0D1A',
+        'bg-elevated': '#10132A',
+        'bg-surface': '#161A35',
+        'bg-overlay': '#1E2240',
+        'on-surface': '#e3e1ec',
+        'on-surface-variant': '#ccc3d8',
+        'outline-variant': '#4a4455',
+        'background': '#12131a',
+        'surface-container': '#1e1f27',
+        'surface-container-low': '#1a1b23',
+        'primary': '#d2bbff',
+        'primary-container': '#7c3aed',
+        'on-primary': '#3f008e',
+        'secondary': '#adc6ff',
+        'tertiary': '#ffb95f',
+        'status-active': '#8B5CF6',
+        'status-scheduled': '#F59E0B',
+        'status-expiring': '#EF4444',
+        'group-family': '#F472B6',
+        'group-friends': '#38BDF8',
+        'group-work': '#FBBF24',
+        'group-unknown': '#94A3B8',
+      },
+      borderRadius: {
+        'xl': '1rem',
+        '2xl': '1.25rem',
+        '3xl': '1.75rem',
+      },
+      fontFamily: {
+        display: ['Outfit', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+      },
+    },
+  },
+  plugins: [],
+};

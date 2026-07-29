@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Header({ activePage, onBack, onOpenSettings }) {
+export default function Header({ activePage, onBack, onOpenSettings, onLogout }) {
   const isHome = activePage === 'dashboard';
 
   return (
@@ -34,8 +34,24 @@ export default function Header({ activePage, onBack, onOpenSettings }) {
         </h1>
       </div>
 
-      {/* Right side: Active Status pill & Settings button */}
+      {/* Right side: Log Out button, Active Status pill & Settings button */}
       <div className="flex items-center gap-2">
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full transition-all duration-200 hover:bg-red-500/20 active:scale-95 cursor-pointer"
+            style={{
+              background: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#f87171',
+            }}
+            title="Log Out to Login page"
+          >
+            <span className="material-symbols-outlined text-sm">logout</span>
+            <span>Log Out</span>
+          </button>
+        )}
+
         <span
           className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full"
           style={{

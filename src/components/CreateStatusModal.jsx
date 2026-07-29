@@ -1,14 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import statusStore from '../store/statusStore';
 import messageStore, { DEFAULT_MESSAGES } from '../store/messageStore';
 import statusEngine from '../engine/statusEngine';
 
-const EMOJI_OPTIONS = ['🧘', '😴', '💼', '📚', '🚗', '💪', '🚫', '🎯', '🌴', '🎧', '🎮', '✈️'];
+// ── Emoji catalogue grouped by theme ────────────────────────────────────────
+const EMOJI_OPTIONS = [
+  // Work & Focus
+  '💼', '💻', '🎯', '📝', '✍️', '📊', '📈', '🔬', '🖥️', '📞', '📱', '🏗️',
+  // Rest & Sleep
+  '😴', '🛌', '🌙', '😌', '🧸', '💤',
+  // Health & Fitness
+  '💪', '🏃', '🧘', '🚴', '🏊', '🏋️', '⚽', '🏀', '🎾', '🏔️', '🚿', '🩺',
+  // Food & Drink
+  '🍽️', '☕', '🍕', '🥗', '🍱', '🧃',
+  // Transport
+  '🚗', '✈️', '🚂', '🚢', '🚶', '🏍️', '🛵',
+  // Social & Family
+  '🏠', '❤️', '🎉', '🙏', '🛒', '🎓', '👨‍👩‍👧',
+  // Entertainment
+  '🎮', '🎧', '🎬', '🎵', '🎨', '📖', '🎭',
+  // Status & Signals
+  '🚫', '⚡', '🔕', '⏳', '🌴', '🌅', '🤫', '🟢', '🔴',
+];
+
+// ── Keyword → emoji mapping for auto-suggest ────────────────────────────────
+const KEYWORD_MAP = [
+  { keywords: ['sleep', 'nap', 'rest', 'tired', 'bed', 'night time'], emoji: '😴' },
+  { keywords: ['night', 'midnight', 'late', 'dark'], emoji: '🌙' },
+  { keywords: ['meeting', 'standup', 'call', 'zoom', 'conference', 'sync'], emoji: '📞' },
+  { keywords: ['work', 'office', 'job', 'business', 'professional'], emoji: '💼' },
+  { keywords: ['study', 'studying', 'reading', 'learn', 'homework', 'exam', 'revision', 'book'], emoji: '📖' },
+  { keywords: ['code', 'coding', 'program', 'develop', 'debug', 'deploy', 'hack'], emoji: '💻' },
+  { keywords: ['drive', 'driving', 'car', 'commut'], emoji: '🚗' },
+  { keywords: ['gym', 'workout', 'exercise', 'fitness', 'lift', 'lifting', 'weights'], emoji: '💪' },
+  { keywords: ['run', 'running', 'jog', 'jogging', 'sprint', 'marathon'], emoji: '🏃' },
+  { keywords: ['bike', 'biking', 'cycl', 'cycle', 'cycling'], emoji: '🚴' },
+  { keywords: ['swim', 'swimming', 'pool'], emoji: '🏊' },
+  { keywords: ['yoga', 'meditat', 'mindful', 'breath', 'calm', 'zen'], emoji: '🧘' },
+  { keywords: ['sport', 'soccer', 'football', 'tennis', 'basket', 'athletic'], emoji: '⚽' },
+  { keywords: ['hike', 'hiking', 'mountain', 'trek', 'camp', 'outdoor', 'trail'], emoji: '🏔️' },
+  { keywords: ['busy', 'dnd', 'do not disturb', 'unavailab', 'blocked', 'no calls'], emoji: '🚫' },
+  { keywords: ['silent', 'mute', 'quiet', 'off', 'notification'], emoji: '🔕' },
+  { keywords: ['focus', 'deep', 'concentrat', 'flow', 'uninterrupt'], emoji: '🎯' },
+  { keywords: ['vacation', 'holiday', 'relax', 'beach', 'resort', 'getaway'], emoji: '🌴' },
+  { keywords: ['travel', 'flight', 'airplane', 'plane', 'trip', 'fly', 'airport'], emoji: '✈️' },
+  { keywords: ['music', 'listen', 'podcast', 'audio', 'headphone', 'playlist'], emoji: '🎧' },
+  { keywords: ['game', 'gaming', 'play', 'video game', 'stream'], emoji: '🎮' },
+  { keywords: ['movie', 'film', 'cinema', 'watch', 'netflix', 'series', 'tv'], emoji: '🎬' },
+  { keywords: ['art', 'draw', 'sketch', 'design', 'paint', 'creat', 'illustrat'], emoji: '🎨' },
+  { keywords: ['eat', 'eating', 'lunch', 'dinner', 'breakfast', 'food', 'meal', 'snack'], emoji: '🍽️' },
+  { keywords: ['coffee', 'cafe', 'tea', 'brew', 'espresso', 'latte'], emoji: '☕' },
+  { keywords: ['shop', 'shopping', 'groceri', 'market', 'store', 'buy', 'errand'], emoji: '🛒' },
+  { keywords: ['doctor', 'hospital', 'sick', 'medical', 'clinic', 'appointment', 'therapy'], emoji: '🩺' },
+  { keywords: ['pray', 'prayer', 'church', 'temple', 'mosque', 'worship', 'devotion'], emoji: '🙏' },
+  { keywords: ['home', 'house', 'family time', 'domestic'], emoji: '🏠' },
+  { keywords: ['family', 'parent', 'kids', 'children', 'baby'], emoji: '👨‍👩‍👧' },
+  { keywords: ['party', 'celebrat', 'birthday', 'event', 'social', 'gathering'], emoji: '🎉' },
+  { keywords: ['shower', 'bath', 'hygiene', 'groom', 'self care', 'spa'], emoji: '🚿' },
+  { keywords: ['morning', 'sunrise', 'dawn', 'early', 'wake', 'start'], emoji: '🌅' },
+  { keywords: ['write', 'writing', 'journal', 'note', 'draft', 'blog', 'essay'], emoji: '✍️' },
+  { keywords: ['class', 'school', 'universit', 'college', 'lecture', 'course'], emoji: '🎓' },
+  { keywords: ['data', 'report', 'chart', 'stat', 'analysis', 'research'], emoji: '📊' },
+  { keywords: ['present', 'pitch', 'demo', 'present'], emoji: '📈' },
+  { keywords: ['wait', 'waiting', 'pending', 'hold', 'queue'], emoji: '⏳' },
+  { keywords: ['secret', 'private', 'shh', 'hush', 'incognito', 'stealth'], emoji: '🤫' },
+  { keywords: ['online', 'available', 'open', 'active', 'free'], emoji: '🟢' },
+  { keywords: ['offline', 'away', 'gone', 'closed'], emoji: '🔴' },
+];
+
+/** Find the best emoji for a given name string */
+function autoDetectEmoji(text) {
+  if (!text.trim()) return null;
+  const lower = text.toLowerCase();
+  for (const { keywords, emoji } of KEYWORD_MAP) {
+    if (keywords.some((k) => lower.includes(k))) return emoji;
+  }
+  return null;
+}
 
 export default function CreateStatusModal({ onClose, onSave, initialStatus = null }) {
   const [name, setName] = useState(initialStatus?.name || '');
-  const [emoji, setEmoji] = useState(initialStatus?.emoji || '🧘');
+  const [emoji, setEmoji] = useState(initialStatus?.emoji || '🎯');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  // When true, emoji auto-updates as user types; set to false once user manually picks
+  const [autoEmoji, setAutoEmoji] = useState(!initialStatus?.emoji);
+
+  // Auto-suggest emoji while user types (only when not manually overridden)
+  useEffect(() => {
+    if (!autoEmoji) return;
+    const detected = autoDetectEmoji(name);
+    if (detected) setEmoji(detected);
+  }, [name, autoEmoji]);
 
   // Time window
   const [startTime, setStartTime] = useState(initialStatus?.startTime || '09:00');
@@ -27,11 +109,20 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
     setMessages((prev) => ({ ...prev, [group]: text }));
   };
 
+  // Live check: is the current wall-clock time inside this status's window?
+  const toMinsLocal = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+  const isActiveNow =
+    toMinsLocal(endTime) > toMinsLocal(startTime) &&
+    nowMins >= toMinsLocal(startTime) &&
+    nowMins < toMinsLocal(endTime);
+  const remainingMinsNow = isActiveNow ? toMinsLocal(endTime) - nowMins : 0;
+
   const handleSave = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    // Calculate duration from start/end time
+    // Helper: "HH:MM" → minutes since midnight
     const toMins = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
     const rawMins = toMins(endTime) - toMins(startTime);
     const durationMinutes = rawMins > 0 ? rawMins : 60;
@@ -55,12 +146,26 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
     // Also update global group messages so they display immediately on the Messages page
     messageStore.saveGlobalAll(messages);
 
-    // Sync active status metadata if currently running
-    statusEngine.updateActiveMetadata(targetStatusId, name.trim(), emoji);
+    // ── Auto-activate if current time is within the status's time window ──────
+    // e.g. user sets 10:00–12:00 and it's currently 11:15 → activate with 45 min remaining
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    const startMins = toMins(startTime);
+    const endMins = toMins(endTime);
 
-    onSave();
+    if (endMins > startMins && currentMins >= startMins && currentMins < endMins) {
+      // Within window — activate with the remaining duration until end time
+      const remainingMins = endMins - currentMins;
+      statusEngine.activate(targetStatusId, remainingMins, 'schedule');
+    } else {
+      // Outside window — only sync metadata if this status is already active
+      statusEngine.updateActiveMetadata(targetStatusId, name.trim(), emoji);
+    }
+
+    onSave();  // triggers refreshActiveStatus() in App → Dashboard updates instantly
     onClose();
   };
+
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-bg-base/95 backdrop-blur-xl flex flex-col">
@@ -92,49 +197,81 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
       {/* ── Content Form ── */}
       <form onSubmit={handleSave} className="flex-1 max-w-md w-full mx-auto p-4 space-y-5 pb-24">
         {/* ── Status Name Card ── */}
-        <div className="glass-card p-4 flex items-center gap-4 relative">
-          {/* Emoji Picker trigger button */}
-          <button
-            type="button"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl bg-bg-surface border border-white/10 hover:border-primary/40 transition-all flex-shrink-0 cursor-pointer"
-          >
-            {emoji}
-          </button>
+        {/* Outer wrapper elevates z-index when picker is open so it floats above sibling cards */}
+        <div className="relative" style={{ zIndex: showEmojiPicker ? 50 : 'auto' }}>
+          <div className="glass-card p-4 flex items-center gap-4">
+            {/* Emoji Picker trigger button */}
+            <div className="relative flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl bg-bg-surface border border-white/10 hover:border-primary/40 transition-all cursor-pointer"
+              >
+                {emoji}
+              </button>
+              {/* Auto-suggest badge */}
+              {autoEmoji && name.trim() && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 text-[9px] font-bold px-1 py-0.5 rounded-full leading-none"
+                  style={{ background: 'rgba(124,58,237,0.8)', color: '#fff', border: '1px solid rgba(210,187,255,0.3)' }}
+                  title="Emoji auto-suggested from your status name"
+                >
+                  auto
+                </span>
+              )}
+            </div>
 
-          <div className="flex-1 min-w-0">
-            <label className="block text-xs font-medium text-outline-variant mb-1">Status Name</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g., Deep Work"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-bg-surface border border-white/10 text-on-surface placeholder:text-outline-variant/60 focus:outline-none focus:border-primary/50"
-            />
+            <div className="flex-1 min-w-0">
+              <label className="block text-xs font-medium text-outline-variant mb-1">Status Name</label>
+              <input
+                type="text"
+                required
+                placeholder="e.g., Deep Work, Sleeping, At Gym…"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl text-sm bg-bg-surface border border-white/10 text-on-surface placeholder:text-outline-variant/60 focus:outline-none focus:border-primary/50"
+              />
+              {autoEmoji && name.trim() && (
+                <p className="text-[10px] mt-1" style={{ color: 'rgba(210,187,255,0.5)' }}>
+                  ✨ Emoji auto-matched · tap emoji to override
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Emoji Picker Dropdown Grid */}
+          {/* Emoji Picker Dropdown — outside glass-card to escape its stacking context */}
           {showEmojiPicker && (
-            <div className="absolute top-20 left-4 z-20 glass-card p-3 grid grid-cols-6 gap-2 bg-bg-elevated border border-white/15 shadow-xl">
+            <div className="absolute top-[4.5rem] left-0 z-50 glass-card p-3 grid grid-cols-8 gap-1.5 bg-bg-elevated border border-white/15 shadow-xl w-full">
               {EMOJI_OPTIONS.map((item) => (
                 <button
                   type="button"
                   key={item}
                   onClick={() => {
                     setEmoji(item);
+                    setAutoEmoji(false); // lock — user chose manually
                     setShowEmojiPicker(false);
                   }}
-                  className={`p-2 text-xl rounded-lg text-center ${
+                  className={`p-2 text-xl rounded-lg text-center transition-colors ${
                     emoji === item ? 'bg-primary/20 border border-primary/50' : 'hover:bg-white/5'
                   }`}
                 >
                   {item}
                 </button>
               ))}
+              {/* Reset to auto button */}
+              {!autoEmoji && (
+                <button
+                  type="button"
+                  onClick={() => { setAutoEmoji(true); setShowEmojiPicker(false); }}
+                  className="col-span-2 mt-1 px-2 py-1 rounded-lg text-[10px] font-semibold text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors border border-primary/20"
+                >
+                  ✨ Auto
+                </button>
+              )}
             </div>
           )}
         </div>
+
 
         {/* ── Time Window Card ── */}
         <div className="glass-card p-4 space-y-3">
@@ -178,6 +315,25 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
               </div>
             </div>
           </div>
+
+          {/* Live indicator — shown when current time is inside the window */}
+          {isActiveNow ? (
+            <div
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
+              style={{
+                background: 'rgba(34,197,94,0.12)',
+                border: '1px solid rgba(34,197,94,0.3)',
+                color: '#4ade80',
+              }}
+            >
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+              Active right now · will auto-activate on save ({remainingMinsNow}m remaining)
+            </div>
+          ) : (
+            <p className="text-[10px] text-outline-variant/60">
+              ⏰ Will auto-activate when the clock reaches this window
+            </p>
+          )}
         </div>
 
         {/* ── Contact Groups & Replies ── */}

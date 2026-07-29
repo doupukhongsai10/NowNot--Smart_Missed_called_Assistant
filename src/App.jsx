@@ -18,10 +18,11 @@ import authStore from './store/authStore';
  * Handles routing, navigation history, and the scheduler tick loop.
  */
 function AppShell() {
-  const [activePage, setActivePage] = useState('dashboard');
-  const [pageHistory, setPageHistory] = useState(['dashboard']);
-  const [editingStatus, setEditingStatus] = useState(null);
   const [currentUser, setCurrentUser] = useState(() => authStore.getSession());
+  // Start on 'auth' if no session exists, otherwise go to 'dashboard'
+  const [activePage, setActivePage] = useState(() => authStore.getSession() ? 'dashboard' : 'auth');
+  const [pageHistory, setPageHistory] = useState(() => authStore.getSession() ? ['dashboard'] : ['auth']);
+  const [editingStatus, setEditingStatus] = useState(null);
 
   // Mount the 60-second scheduler tick loop for the lifetime of the app.
   // refreshActiveStatus comes from the shared StatusContext so all pages update.
@@ -51,20 +52,23 @@ function AppShell() {
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
+    setPageHistory(['dashboard']);
     setActivePage('dashboard');
   };
 
   const handleLogout = () => {
     authStore.logout();
     setCurrentUser(null);
+    setPageHistory(['auth']);
     setActivePage('auth');
   };
 
-  const renderPage = () => {
-    if (activePage === 'auth') {
-      return <Auth onLoginSuccess={handleLoginSuccess} />;
-    }
+  // Auth guard — always show login if no user session
+  if (!currentUser || activePage === 'auth') {
+    return <Auth onLoginSuccess={handleLoginSuccess} />;
+  }
 
+  const renderPage = () => {
     switch (activePage) {
       case 'dashboard':
         return <Dashboard onNavigate={navigateTo} />;
@@ -86,17 +90,10 @@ function AppShell() {
         return <CallLog />;
       case 'settings':
         return <Settings onLogout={handleLogout} />;
-      case 'auth':
-        return <Auth onLoginSuccess={handleLoginSuccess} />;
       default:
         return <Dashboard onNavigate={navigateTo} />;
     }
   };
-
-  // If on Auth page, render Auth full screen
-  if (activePage === 'auth') {
-    return <Auth onLoginSuccess={handleLoginSuccess} />;
-  }
 
   // Keep bottom nav highlighting 'statuses' when on 'create-status'
   const navActiveTab = activePage === 'create-status' ? 'statuses' : activePage;
@@ -114,7 +111,7 @@ function AppShell() {
           activePage={activePage}
           onBack={handleBack}
           onOpenSettings={() => navigateTo('settings')}
-          onAuthClick={() => setActivePage('auth')}
+          onLogout={handleLogout}
         />
       )}
 

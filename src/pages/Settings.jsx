@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import settingsStore from '../store/settingsStore';
+import contactsStore from '../store/contactsStore';
 
 export default function Settings() {
   const [settings, setSettings] = useState(() => settingsStore.get());
@@ -41,7 +42,31 @@ export default function Settings() {
 
   const profile = settings.profile;
   const toggles = settings.toggles;
-  const groups = settings.groups;
+
+  // Compute live group member counts from saved contacts
+  // Normalize 'Friends' → 'Friends & Relatives' so both variants count as one group
+  const allContacts = contactsStore.getAll();
+  const normalizeGroup = (g) => {
+    const t = (g || 'Unknown').trim();
+    const lower = t.toLowerCase();
+    if (lower === 'friends' || lower === 'relatives' || lower === 'friends & relatives' || lower === 'friends and relatives') {
+      return 'Friends & Relatives';
+    }
+    return t;
+  };
+  const countByGroup = allContacts.reduce((acc, c) => {
+    const key = normalizeGroup(c.group);
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Merge live counts into the groups config (name matching is case-insensitive)
+  const groups = settings.groups.map((grp) => {
+    const liveCount = Object.entries(countByGroup).find(
+      ([key]) => key.toLowerCase() === grp.name.toLowerCase()
+    );
+    return { ...grp, count: liveCount ? liveCount[1] : 0 };
+  });
 
   return (
     <>
@@ -382,8 +407,14 @@ export default function Settings() {
                   style={{ background: selectedGroup.color }}
                 />
                 <h2 className="font-display font-bold text-lg text-on-surface">
-                  {selectedGroup.name} Group
+                  {selectedGroup.name}
                 </h2>
+                <span
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: `${selectedGroup.color}20`, color: selectedGroup.color }}
+                >
+                  {selectedGroup.count} {selectedGroup.count === 1 ? 'member' : 'members'}
+                </span>
               </div>
               <button
                 onClick={() => setActiveModal(null)}
@@ -393,13 +424,37 @@ export default function Settings() {
               </button>
             </div>
 
-            <p className="text-xs text-outline-variant leading-relaxed">
-              Contains {selectedGroup.count} contacts assigned to the{' '}
-              <span style={{ color: selectedGroup.color, fontWeight: 600 }}>
-                {selectedGroup.name}
-              </span>{' '}
-              auto-reply rule.
-            </p>
+            {/* Live contacts list for this group */}
+            {(() => {
+              const groupContacts = allContacts.filter(
+                (c) => normalizeGroup(c.group).toLowerCase() === selectedGroup.name.toLowerCase()
+              );
+              return groupContacts.length > 0 ? (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {groupContacts.map((c) => (
+                    <div
+                      key={c.id}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/5 border border-white/5"
+                    >
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                        style={{ background: `${selectedGroup.color}25`, color: selectedGroup.color }}
+                      >
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-on-surface truncate">{c.name}</p>
+                        <p className="text-[10px] font-mono text-outline-variant truncate">{c.phone}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-outline-variant/60 text-center py-3">
+                  No contacts in this group yet
+                </p>
+              );
+            })()}
 
             <button
               onClick={() => setActiveModal(null)}

@@ -30,7 +30,8 @@ function get() {
     const parsed = JSON.parse(raw);
     return {
       profile: { ...DEFAULT_SETTINGS.profile, ...(parsed.profile || {}) },
-      groups: parsed.groups || DEFAULT_SETTINGS.groups,
+      // Always use the canonical group list — counts are computed live from contacts
+      groups: DEFAULT_SETTINGS.groups,
       toggles: { ...DEFAULT_SETTINGS.toggles, ...(parsed.toggles || {}) },
     };
   } catch {

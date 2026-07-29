@@ -1,24 +1,16 @@
 const SESSION_KEY = 'nn_auth_session';
-const USERS_KEY = 'nn_users';
-
-const DEFAULT_USER = {
-  id: 'user-default-1',
-  name: 'Adrian Vance',
-  phone: '+44 7700 900000',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-};
 
 /**
- * Returns current active session or default session.
+ * Returns current active session, or null if no session exists.
  * @returns {Object|null}
  */
 export function getSession() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
-    if (!raw) return DEFAULT_USER; // Default logged-in user for prototype demo
+    if (!raw) return null;
     return JSON.parse(raw);
   } catch {
-    return DEFAULT_USER;
+    return null;
   }
 }
 

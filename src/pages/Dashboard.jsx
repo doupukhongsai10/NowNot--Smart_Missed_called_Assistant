@@ -132,7 +132,7 @@ export default function Dashboard({ onNavigate }) {
                 style={{ fontFamily: "'JetBrains Mono', monospace", color: 'rgba(210,187,255,0.75)' }}
               >
                 <span className="material-symbols-outlined text-sm">schedule</span>
-                until {new Date(activeStatus.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                until {new Date(activeStatus.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
               </p>
 
               <div className="mt-4 flex items-end justify-between">

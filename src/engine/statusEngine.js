@@ -1,15 +1,22 @@
 import statusStore from '../store/statusStore';
+import authStore from '../store/authStore';
 
-const ACTIVE_KEY = 'nn_active_status';
+const BASE_KEY = 'active_status';
+
+function getKey() {
+  const userId = authStore.getCurrentUserId();
+  return `nn_${userId}_${BASE_KEY}`;
+}
 
 /**
- * Reads the currently active status from localStorage.
+ * Reads the currently active status from localStorage for current user.
  * Automatically checks for expiry and deactivates if expired.
  * @returns {Object|null} The active status record or null if idle
  */
 function getActive() {
+  const activeKey = getKey();
   try {
-    const raw = localStorage.getItem(ACTIVE_KEY);
+    const raw = localStorage.getItem(activeKey);
     if (!raw) return null;
     const active = JSON.parse(raw);
     if (!active || !active.expiresAt) return null;
@@ -31,18 +38,18 @@ function getActive() {
 }
 
 /**
- * Deactivates the currently active status (INV-1).
+ * Deactivates the currently active status for current user (INV-1).
  */
 function deactivate() {
   try {
-    localStorage.removeItem(ACTIVE_KEY);
+    localStorage.removeItem(getKey());
   } catch {
     // ignore
   }
 }
 
 /**
- * Activates a status by ID for a specified duration in minutes.
+ * Activates a status by ID for a specified duration in minutes for current user.
  * Deactivates any currently active status first (INV-1).
  * @param {string} statusId
  * @param {number} [durationMinutes] - Duration in minutes. Defaults to status definition default.
@@ -70,7 +77,7 @@ function activate(statusId, durationMinutes, source = 'manual') {
   };
 
   try {
-    localStorage.setItem(ACTIVE_KEY, JSON.stringify(record));
+    localStorage.setItem(getKey(), JSON.stringify(record));
   } catch {
     // ignore
   }
@@ -85,14 +92,15 @@ function activate(statusId, durationMinutes, source = 'manual') {
  * Updates active status metadata (name, emoji) if current active status matches statusId.
  */
 function updateActiveMetadata(statusId, statusName, statusEmoji) {
+  const activeKey = getKey();
   try {
-    const raw = localStorage.getItem(ACTIVE_KEY);
+    const raw = localStorage.getItem(activeKey);
     if (!raw) return;
     const active = JSON.parse(raw);
     if (active && active.statusId === statusId) {
       active.statusName = statusName;
       active.statusEmoji = statusEmoji;
-      localStorage.setItem(ACTIVE_KEY, JSON.stringify(active));
+      localStorage.setItem(activeKey, JSON.stringify(active));
     }
   } catch {
     // ignore

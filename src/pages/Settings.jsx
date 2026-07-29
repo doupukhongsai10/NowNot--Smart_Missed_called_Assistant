@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import settingsStore from '../store/settingsStore';
 import contactsStore from '../store/contactsStore';
 
-export default function Settings() {
+export default function Settings({ onLogout }) {
   const [settings, setSettings] = useState(() => settingsStore.get());
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'notifications' | 'privacy' | 'groupDetail' | 'signOut'
@@ -37,7 +37,11 @@ export default function Settings() {
 
   const handleSignOut = () => {
     setActiveModal(null);
-    showToast('Signed out (demo mode)');
+    if (onLogout) {
+      onLogout();
+    } else {
+      showToast('Signed out');
+    }
   };
 
   const profile = settings.profile;
@@ -305,18 +309,15 @@ export default function Settings() {
       {/* ── Edit Profile Modal Sheet ── */}
       {editProfileOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-bg-void/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-sm"
           onClick={(e) => e.target === e.currentTarget && setEditProfileOpen(false)}
         >
           <div
-            className="w-full max-w-[480px] rounded-t-3xl p-6 space-y-5 flex flex-col"
+            className="w-full max-w-[480px] rounded-3xl p-6 space-y-5 flex flex-col overflow-y-auto"
             style={{
               background: 'linear-gradient(180deg, #1E2240 0%, #12131a 100%)',
               border: '1px solid rgba(255,255,255,0.1)',
-              borderBottom: 'none',
-              maxHeight: 'calc(92dvh - 72px)',
-              marginBottom: '72px',
-              overflowY: 'auto',
+              maxHeight: 'calc(100vh - 100px)',
             }}
           >
             <div className="flex justify-center -mt-1 mb-1">
@@ -390,14 +391,15 @@ export default function Settings() {
       {/* ── Group Details Modal Sheet ── */}
       {activeModal === 'groupDetail' && selectedGroup && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-bg-void/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-sm"
           onClick={(e) => e.target === e.currentTarget && setActiveModal(null)}
         >
           <div
-            className="w-full max-w-[480px] rounded-t-3xl p-6 space-y-4 mb-20"
+            className="w-full max-w-[480px] rounded-3xl p-6 space-y-4 overflow-y-auto"
             style={{
               background: 'linear-gradient(180deg, #1E2240 0%, #12131a 100%)',
               border: '1px solid rgba(255,255,255,0.1)',
+              maxHeight: 'calc(100vh - 100px)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -469,14 +471,15 @@ export default function Settings() {
       {/* ── Notification Settings Sheet ── */}
       {activeModal === 'notifications' && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-bg-void/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-sm"
           onClick={(e) => e.target === e.currentTarget && setActiveModal(null)}
         >
           <div
-            className="w-full max-w-[480px] rounded-t-3xl p-6 space-y-4 mb-20"
+            className="w-full max-w-[480px] rounded-3xl p-6 space-y-4 overflow-y-auto"
             style={{
               background: 'linear-gradient(180deg, #1E2240 0%, #12131a 100%)',
               border: '1px solid rgba(255,255,255,0.1)',
+              maxHeight: 'calc(100vh - 100px)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -509,14 +512,15 @@ export default function Settings() {
       {/* ── Privacy Policy Sheet ── */}
       {activeModal === 'privacy' && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-bg-void/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-sm"
           onClick={(e) => e.target === e.currentTarget && setActiveModal(null)}
         >
           <div
-            className="w-full max-w-[480px] rounded-t-3xl p-6 space-y-4 mb-20"
+            className="w-full max-w-[480px] rounded-3xl p-6 space-y-4 overflow-y-auto"
             style={{
               background: 'linear-gradient(180deg, #1E2240 0%, #12131a 100%)',
               border: '1px solid rgba(255,255,255,0.1)',
+              maxHeight: 'calc(100vh - 100px)',
             }}
           >
             <div className="flex items-center justify-between">
@@ -549,7 +553,7 @@ export default function Settings() {
       {/* ── Sign Out Confirmation Modal ── */}
       {activeModal === 'signOut' && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg-void/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-bg-void/80 backdrop-blur-sm"
           onClick={(e) => e.target === e.currentTarget && setActiveModal(null)}
         >
           <div className="glass-card p-6 max-w-xs w-full space-y-4 text-center border border-white/15 shadow-2xl">

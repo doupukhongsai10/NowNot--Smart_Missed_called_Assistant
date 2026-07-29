@@ -1,51 +1,74 @@
-const KEY = 'nn_settings';
+import authStore from './authStore';
 
-export const DEFAULT_SETTINGS = {
-  profile: {
-    name: 'Adrian Vance',
-    phone: '+1 (555) 012-3456',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-  },
-  groups: [
-    { id: 'family', name: 'Family', count: 12, color: '#F472B6' },
-    { id: 'friends_relatives', name: 'Friends & Relatives', count: 56, color: '#38BDF8' },
-    { id: 'work', name: 'Work', count: 24, color: '#FBBF24' },
-    { id: 'unknown', name: 'Unknown', count: 156, color: '#94A3B8', label: 'filtered' },
-  ],
-  toggles: {
-    enableAutomation: true,
-    smartCallbackReminders: false,
-    lowBatteryMode: true,
-  },
+const BASE_KEY = 'settings';
+
+function getKey() {
+  const userId = authStore.getCurrentUserId();
+  return `nn_${userId}_${BASE_KEY}`;
+}
+
+export const CANONICAL_GROUPS = [
+  { id: 'family', name: 'Family', count: 0, color: '#F472B6' },
+  { id: 'friends_relatives', name: 'Friends & Relatives', count: 0, color: '#38BDF8' },
+  { id: 'work', name: 'Work', count: 0, color: '#FBBF24' },
+  { id: 'unknown', name: 'Unknown', count: 0, color: '#94A3B8', label: 'filtered' },
+];
+
+export const DEFAULT_TOGGLES = {
+  enableAutomation: true,
+  smartCallbackReminders: false,
+  lowBatteryMode: true,
 };
 
 /**
- * Reads settings from localStorage.
+ * Builds default profile dynamically from current user session.
+ */
+function getDefaultProfile() {
+  const session = authStore.getSession();
+  return {
+    name: session?.name || 'New User',
+    phone: session?.phone || '+1 (555) 000-0000',
+    avatar: session?.avatar || '',
+  };
+}
+
+/**
+ * Reads settings from localStorage for current user.
  * @returns {Object}
  */
 function get() {
+  const defaultProfile = getDefaultProfile();
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return DEFAULT_SETTINGS;
+    const raw = localStorage.getItem(getKey());
+    if (!raw) {
+      return {
+        profile: defaultProfile,
+        groups: CANONICAL_GROUPS,
+        toggles: DEFAULT_TOGGLES,
+      };
+    }
     const parsed = JSON.parse(raw);
     return {
-      profile: { ...DEFAULT_SETTINGS.profile, ...(parsed.profile || {}) },
-      // Always use the canonical group list — counts are computed live from contacts
-      groups: DEFAULT_SETTINGS.groups,
-      toggles: { ...DEFAULT_SETTINGS.toggles, ...(parsed.toggles || {}) },
+      profile: { ...defaultProfile, ...(parsed.profile || {}) },
+      groups: CANONICAL_GROUPS,
+      toggles: { ...DEFAULT_TOGGLES, ...(parsed.toggles || {}) },
     };
   } catch {
-    return DEFAULT_SETTINGS;
+    return {
+      profile: defaultProfile,
+      groups: CANONICAL_GROUPS,
+      toggles: DEFAULT_TOGGLES,
+    };
   }
 }
 
 /**
- * Saves updated settings object to localStorage.
+ * Saves updated settings object to localStorage for current user.
  * @param {Object} updatedSettings
  */
 function save(updatedSettings) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(updatedSettings));
+    localStorage.setItem(getKey(), JSON.stringify(updatedSettings));
   } catch {
     // ignore quota error
   }
@@ -53,7 +76,7 @@ function save(updatedSettings) {
 }
 
 /**
- * Toggles a setting flag by key.
+ * Toggles a setting flag by key for current user.
  * @param {string} toggleKey
  */
 function toggleFlag(toggleKey) {
@@ -70,7 +93,7 @@ function toggleFlag(toggleKey) {
 }
 
 /**
- * Updates profile information.
+ * Updates profile information for current user.
  * @param {{ name: string, phone: string, avatar?: string }} newProfile
  */
 function updateProfile(newProfile) {

@@ -1,70 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useStatusContext } from '../context/StatusContext';
 import statusStore from '../store/statusStore';
+import callLogStore from '../store/callLogStore';
 
-const INITIAL_LOGS = [
-  {
-    id: '1',
-    name: 'Mom',
-    time: '14:22',
-    type: 'Missed Call',
-    group: 'Family',
-    groupAccent: 'accent-family',
-    groupColor: '#F472B6',
-    avatar: '👩',
-    count: 1,
-  },
-  {
-    id: '2',
-    name: 'Julian (Project Lead)',
-    time: '13:05',
-    type: 'Missed Call',
-    group: 'Work',
-    groupAccent: 'accent-work',
-    groupColor: '#FBBF24',
-    avatar: '👨‍💼',
-    count: 1,
-  },
-  {
-    id: '3',
-    name: 'Sarah',
-    time: '12:40',
-    type: '2 Missed Calls',
-    group: 'Family',
-    groupAccent: 'accent-family',
-    groupColor: '#F472B6',
-    avatar: '👧',
-    count: 2,
-  },
-  {
-    id: '4',
-    name: 'Alex',
-    time: '11:15',
-    type: 'Missed Call',
-    group: 'Friends',
-    groupAccent: 'accent-friends',
-    groupColor: '#38BDF8',
-    avatar: '👤',
-    count: 1,
-  },
-];
+const GROUP_COLORS = {
+  Family: '#F472B6',
+  'Friends & Relatives': '#38BDF8',
+  Friends: '#38BDF8',
+  Work: '#FBBF24',
+  Unknown: '#94A3B8',
+};
 
 export default function Dashboard({ onNavigate }) {
   const { activeStatus, timeLeftStr, activate, deactivate } = useStatusContext();
   const [statuses, setStatuses] = useState(() => statusStore.getAll().slice(0, 5));
+  const [logs, setLogs] = useState(() => callLogStore.getAll().slice(0, 5));
 
-  // Refresh statuses whenever Dashboard mounts or the localStorage key changes
-  // (covers: returning from create-status, edits from another page, etc.)
-  const refreshStatuses = () => setStatuses(statusStore.getAll().slice(0, 5));
+  // Refresh statuses and logs whenever Dashboard mounts or storage changes
+  const refreshData = () => {
+    setStatuses(statusStore.getAll().slice(0, 5));
+    setLogs(callLogStore.getAll().slice(0, 5));
+  };
 
   useEffect(() => {
-    refreshStatuses();
-    // Also catch storage writes from other components/tabs
-    window.addEventListener('storage', refreshStatuses);
-    window.addEventListener('focus', refreshStatuses);
+    refreshData();
+    window.addEventListener('storage', refreshData);
+    window.addEventListener('focus', refreshData);
     return () => {
-      window.removeEventListener('storage', refreshStatuses);
-      window.removeEventListener('focus', refreshStatuses);
+      window.removeEventListener('storage', refreshData);
+      window.removeEventListener('focus', refreshData);
     };
   }, []);
 
@@ -267,45 +231,55 @@ export default function Dashboard({ onNavigate }) {
         </div>
 
         <div className="space-y-2">
-          {INITIAL_LOGS.map((log) => (
-            <div key={log.id} className={`glass-card accent-left ${log.groupAccent} p-4 flex items-center gap-3`}>
-              <div
-                className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-lg"
-                style={{
-                  background: '#161A35',
-                  border: `1px solid ${log.groupColor}4D`,
-                }}
-              >
-                {log.avatar}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline">
-                  <h4 className="font-semibold text-sm truncate text-on-surface">{log.name}</h4>
-                  <span className="text-xs flex-shrink-0 ml-2 font-mono text-on-surface-variant/50">
-                    {log.time}
-                  </span>
-                </div>
-                <p className="text-xs mt-0.5 text-outline-variant">
-                  {log.type} · <span style={{ color: log.groupColor }}>{log.group}</span>
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                <span className="material-symbols-outlined text-lg" style={{ color: log.groupColor }}>
-                  call_missed
-                </span>
-                {log.count > 1 && (
-                  <span
-                    className="text-xs font-bold leading-none px-1.5 py-0.5 rounded-full"
-                    style={{ background: `${log.groupColor}2E`, color: log.groupColor }}
+          {logs.length > 0 ? (
+            logs.map((log) => {
+              const color = GROUP_COLORS[log.group] || '#94A3B8';
+              return (
+                <div key={log.id} className="glass-card p-4 flex items-center gap-3 border-l-2" style={{ borderLeftColor: color }}>
+                  <div
+                    className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-lg"
+                    style={{
+                      background: '#161A35',
+                      border: `1px solid ${color}4D`,
+                    }}
                   >
-                    ×{log.count}
-                  </span>
-                )}
-              </div>
+                    {log.avatar || '👤'}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-baseline">
+                      <h4 className="font-semibold text-sm truncate text-on-surface">{log.name}</h4>
+                      <span className="text-xs flex-shrink-0 ml-2 font-mono text-on-surface-variant/50">
+                        {log.time}
+                      </span>
+                    </div>
+                    <p className="text-xs mt-0.5 text-outline-variant">
+                      {log.type || 'Missed Call'} · <span style={{ color }}>{log.group || 'Unknown'}</span>
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                    <span className="material-symbols-outlined text-lg" style={{ color }}>
+                      call_missed
+                    </span>
+                    {(log.count || 1) > 1 && (
+                      <span
+                        className="text-xs font-bold leading-none px-1.5 py-0.5 rounded-full"
+                        style={{ background: `${color}2E`, color }}
+                      >
+                        ×{log.count}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="glass-card p-6 text-center space-y-2">
+              <span className="material-symbols-outlined text-3xl text-outline-variant/40">history</span>
+              <p className="text-xs text-outline-variant font-medium">No missed call activity yet</p>
             </div>
-          ))}
+          )}
         </div>
       </section>
     </div>

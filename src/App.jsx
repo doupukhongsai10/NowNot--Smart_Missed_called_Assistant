@@ -99,7 +99,7 @@ function AppShell() {
   const navActiveTab = activePage === 'create-status' ? 'statuses' : activePage;
 
   return (
-    <div className="min-h-dvh relative">
+    <div className="min-h-dvh relative" key={currentUser?.id || 'guest'}>
       {/* Background glow orbs */}
       <div className="fixed top-[-12%] left-[-8%] w-[45%] h-[45%] bg-status-active/10 blur-[130px] pointer-events-none z-0 rounded-full" />
       <div className="fixed bottom-[-8%] right-[-8%] w-[35%] h-[35%] bg-group-family/5 blur-[110px] pointer-events-none z-0 rounded-full" />
@@ -117,7 +117,7 @@ function AppShell() {
 
       {/* Main Content Area */}
       <main
-        className={`relative z-10 ${
+        className={`relative ${
           activePage === 'create-status' ? 'p-0' : 'pt-20 pb-28 px-4'
         } mx-auto`}
         style={{ maxWidth: activePage === 'create-status' ? '100%' : 480 }}

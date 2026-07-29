@@ -1,30 +1,32 @@
 import { saveContactsToCloud, fetchContactsFromCloud } from '../services/cloudinaryServices';
+import authStore from './authStore';
 
-const KEY = 'nn_contacts';
+const BASE_KEY = 'contacts';
 
-export const DEFAULT_CONTACTS = [
-  { id: '1', name: 'Mom', phone: '+1 (555) 012-1122', group: 'Family' },
-  { id: '2', name: 'Julian (Project Lead)', phone: '+1 (555) 012-9876', group: 'Work' },
-  { id: '3', name: 'Alex Chen', phone: '+1 (555) 012-4455', group: 'Friends & Relatives' },
-];
+function getKey() {
+  const userId = authStore.getCurrentUserId();
+  return `nn_${userId}_${BASE_KEY}`;
+}
+
+export const DEFAULT_CONTACTS = [];
 
 /**
- * Reads all contacts from localStorage.
+ * Reads all contacts from localStorage for current user.
  * @returns {Array} List of contact objects
  */
 function getAll() {
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return DEFAULT_CONTACTS;
+    const raw = localStorage.getItem(getKey());
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : DEFAULT_CONTACTS;
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return DEFAULT_CONTACTS;
+    return [];
   }
 }
 
 /**
- * Saves a new contact or updates an existing one, auto-syncing to Cloudinary.
+ * Saves a new contact or updates an existing one for current user, auto-syncing to Cloudinary.
  * @param {{ id?: string, name: string, phone: string, group: string }} contact
  * @returns {Array} Updated list of contacts
  */
@@ -48,7 +50,7 @@ function save(contact) {
   }
 
   try {
-    localStorage.setItem(KEY, JSON.stringify(updated));
+    localStorage.setItem(getKey(), JSON.stringify(updated));
   } catch {
     // ignore quota error
   }
@@ -68,7 +70,7 @@ function remove(id) {
   const current = getAll();
   const updated = current.filter((c) => c.id !== id);
   try {
-    localStorage.setItem(KEY, JSON.stringify(updated));
+    localStorage.setItem(getKey(), JSON.stringify(updated));
   } catch {
     // ignore
   }
@@ -87,7 +89,7 @@ async function syncFromCloud() {
   const remoteContacts = await fetchContactsFromCloud();
   if (remoteContacts && Array.isArray(remoteContacts) && remoteContacts.length > 0) {
     try {
-      localStorage.setItem(KEY, JSON.stringify(remoteContacts));
+      localStorage.setItem(getKey(), JSON.stringify(remoteContacts));
     } catch {
       // ignore
     }

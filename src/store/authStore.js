@@ -1,4 +1,18 @@
 const SESSION_KEY = 'nn_auth_session';
+const USERS_KEY = 'nn_users';
+
+/**
+ * Returns all registered users from localStorage.
+ * @returns {Array} List of user objects
+ */
+export function getUsers() {
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Returns current active session, or null if no session exists.
@@ -15,34 +29,84 @@ export function getSession() {
 }
 
 /**
+ * Helper to retrieve active user ID for scoping store data.
+ * @returns {string} User ID or 'guest'
+ */
+export function getCurrentUserId() {
+  const session = getSession();
+  return session?.id || 'guest';
+}
+
+/**
  * Logs in user by phone & password.
- * @param {{ phone: string, password?: string }} credentials
- * @returns {Object}
+ * If user exists in registered users, loads that record.
+ * Otherwise registers user.
+ * @param {{ phone: string, name?: string, password?: string }} credentials
+ * @returns {Object} User session record
  */
 export function login({ phone, name }) {
-  const user = {
-    id: `user-${Date.now()}`,
-    name: name || 'Adrian Vance',
-    phone: phone || '+44 7700 900000',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+  const users = getUsers();
+  const cleanPhone = (phone || '').trim();
+  let existingUser = users.find(
+    (u) => u.phone.trim() === cleanPhone || (name && u.name.toLowerCase() === name.trim().toLowerCase())
+  );
+
+  if (!existingUser) {
+    const userName = name && name.trim() ? name.trim() : cleanPhone || 'User';
+    existingUser = {
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      name: userName,
+      phone: cleanPhone || '+1 (555) 000-0000',
+      avatar: '',
+      createdAt: Date.now(),
+    };
+    try {
+      localStorage.setItem(USERS_KEY, JSON.stringify([...users, existingUser]));
+    } catch {
+      // ignore
+    }
+  }
+
+  const session = {
+    ...existingUser,
     loggedInAt: Date.now(),
   };
 
   try {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   } catch {
     // ignore
   }
-  return user;
+  return session;
 }
 
 /**
  * Signs up a new user.
  * @param {{ name: string, phone: string, password?: string }} userData
- * @returns {Object}
+ * @returns {Object} User session record
  */
-export function signup(userData) {
-  return login(userData);
+export function signup({ name, phone, password }) {
+  const users = getUsers();
+  const cleanPhone = (phone || '').trim();
+  const cleanName = (name || '').trim();
+
+  // Create new user account
+  const newUser = {
+    id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    name: cleanName || 'New User',
+    phone: cleanPhone || '+1 (555) 000-0000',
+    avatar: '',
+    createdAt: Date.now(),
+  };
+
+  try {
+    localStorage.setItem(USERS_KEY, JSON.stringify([newUser, ...users]));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(newUser));
+  } catch {
+    // ignore
+  }
+
+  return newUser;
 }
 
 /**
@@ -57,7 +121,9 @@ export function logout() {
 }
 
 const authStore = {
+  getUsers,
   getSession,
+  getCurrentUserId,
   login,
   signup,
   logout,

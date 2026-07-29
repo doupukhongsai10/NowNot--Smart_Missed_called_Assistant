@@ -79,18 +79,15 @@ function EditModal({ group, message, onClose, onSave }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      style={{ background: 'rgba(7,8,15,0.8)', backdropFilter: 'blur(6px)' }}
+      className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-md"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="w-full max-w-[480px] rounded-t-3xl flex flex-col"
+        className="w-full max-w-[480px] rounded-3xl flex flex-col overflow-y-auto"
         style={{
           background: 'linear-gradient(180deg, #1E2240 0%, #12131a 100%)',
           border: '1px solid rgba(255,255,255,0.1)',
-          borderBottom: 'none',
-          maxHeight: 'calc(85dvh - 72px)',
-          marginBottom: '72px',
+          maxHeight: 'calc(100vh - 100px)',
         }}
       >
         {/* Scrollable content */}

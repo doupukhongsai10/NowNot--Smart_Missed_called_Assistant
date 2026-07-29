@@ -1,4 +1,11 @@
-const KEY = 'nn_statuses';
+import authStore from './authStore';
+
+const BASE_KEY = 'statuses';
+
+function getKey() {
+  const userId = authStore.getCurrentUserId();
+  return `nn_${userId}_${BASE_KEY}`;
+}
 
 const DEFAULT_STATUSES = [
   {
@@ -46,15 +53,16 @@ const DEFAULT_STATUSES = [
 ];
 
 /**
- * Reads all stored statuses from localStorage.
- * Seeds default statuses if localStorage is empty.
+ * Reads all stored statuses from localStorage for current user.
+ * Seeds default statuses if localStorage is empty for this user.
  * @returns {Array} List of status objects
  */
 function getAll() {
+  const key = getKey();
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) {
-      localStorage.setItem(KEY, JSON.stringify(DEFAULT_STATUSES));
+      localStorage.setItem(key, JSON.stringify(DEFAULT_STATUSES));
       return DEFAULT_STATUSES;
     }
     const parsed = JSON.parse(raw);
@@ -75,7 +83,7 @@ function getById(id) {
 }
 
 /**
- * Saves a new or updated status to localStorage.
+ * Saves a new or updated status to localStorage for current user.
  * @param {Object} status
  * @returns {Array} Updated list of statuses
  */
@@ -100,7 +108,7 @@ function save(status) {
   }
 
   try {
-    localStorage.setItem(KEY, JSON.stringify(updated));
+    localStorage.setItem(getKey(), JSON.stringify(updated));
   } catch {
     // ignore quota error
   }
@@ -108,7 +116,7 @@ function save(status) {
 }
 
 /**
- * Deletes a custom status from localStorage by ID.
+ * Deletes a custom status from localStorage by ID for current user.
  * System statuses cannot be deleted.
  * @param {string} id
  * @returns {Array} Updated list of statuses
@@ -117,7 +125,7 @@ function remove(id) {
   const statuses = getAll();
   const updated = statuses.filter((s) => s.id !== id || s.isSystem);
   try {
-    localStorage.setItem(KEY, JSON.stringify(updated));
+    localStorage.setItem(getKey(), JSON.stringify(updated));
   } catch {
     // ignore
   }

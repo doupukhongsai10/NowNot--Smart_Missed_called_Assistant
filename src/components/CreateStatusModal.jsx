@@ -168,7 +168,7 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
 
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-bg-base/95 backdrop-blur-xl flex flex-col">
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-bg-base/95 backdrop-blur-xl flex flex-col">
       {/* ── Top Bar ── */}
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 h-16 bg-bg-base/80 backdrop-blur-md border-b border-white/10">
         <button

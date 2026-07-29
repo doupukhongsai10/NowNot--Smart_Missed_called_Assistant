@@ -1,7 +1,18 @@
 import statusEngine from '../engine/statusEngine';
+import authStore from './authStore';
 
-const KEY = 'nn_messages';
-const GLOBAL_KEY = 'nn_messages_global';
+const BASE_KEY = 'messages';
+const BASE_GLOBAL_KEY = 'messages_global';
+
+function getKey() {
+  const userId = authStore.getCurrentUserId();
+  return `nn_${userId}_${BASE_KEY}`;
+}
+
+function getGlobalKey() {
+  const userId = authStore.getCurrentUserId();
+  return `nn_${userId}_${BASE_GLOBAL_KEY}`;
+}
 
 export const DEFAULT_MESSAGES = {
   Family: "Hey! I'm currently focused. If it's urgent, please call twice. I'll get back to you soon. ❤️",
@@ -18,12 +29,12 @@ export const DEFAULT_UPDATED_AT = {
 };
 
 /**
- * Reads all status group messages from localStorage.
+ * Reads all status group messages from localStorage for current user.
  * @returns {Object} Map of statusId -> { Family, Work, Friends, Unknown }
  */
 function getAll() {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(getKey());
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
@@ -31,7 +42,7 @@ function getAll() {
 }
 
 /**
- * Gets group messages for a specific statusId.
+ * Gets group messages for a specific statusId for current user.
  * Falls back to DEFAULT_MESSAGES if not set.
  * @param {string} statusId
  * @returns {Object} { Family, Work, Friends, Unknown }
@@ -45,7 +56,7 @@ function getForStatus(statusId) {
 }
 
 /**
- * Saves group messages for a specific statusId.
+ * Saves group messages for a specific statusId for current user.
  * @param {string} statusId
  * @param {Object} messages - { Family, Work, Friends, Unknown }
  */
@@ -61,7 +72,7 @@ function saveForStatus(statusId, messages) {
   };
 
   try {
-    localStorage.setItem(KEY, JSON.stringify(updated));
+    localStorage.setItem(getKey(), JSON.stringify(updated));
   } catch {
     // ignore
   }
@@ -70,12 +81,12 @@ function saveForStatus(statusId, messages) {
 }
 
 /**
- * Reads global (non-status-specific) group messages.
+ * Reads global (non-status-specific) group messages for current user.
  * @returns {{ messages: Object, updatedAt: Object }}
  */
 function getGlobal() {
   try {
-    const raw = localStorage.getItem(GLOBAL_KEY);
+    const raw = localStorage.getItem(getGlobalKey());
     if (!raw) return { messages: { ...DEFAULT_MESSAGES }, updatedAt: { ...DEFAULT_UPDATED_AT } };
     const parsed = JSON.parse(raw);
     return {
@@ -88,7 +99,7 @@ function getGlobal() {
 }
 
 /**
- * Saves a single group's global message.
+ * Saves a single group's global message for current user.
  * @param {string} group - 'Family' | 'Work' | 'Friends' | 'Unknown'
  * @param {string} text
  */
@@ -99,7 +110,7 @@ function saveGlobal(group, text) {
     updatedAt: { ...current.updatedAt, [group]: Date.now() },
   };
   try {
-    localStorage.setItem(GLOBAL_KEY, JSON.stringify(updated));
+    localStorage.setItem(getGlobalKey(), JSON.stringify(updated));
   } catch {
     // ignore
   }
@@ -114,7 +125,7 @@ function saveGlobal(group, text) {
 }
 
 /**
- * Saves all group messages at once globally.
+ * Saves all group messages at once globally for current user.
  * @param {Object} messagesObj - { Family, Work, Friends, Unknown }
  */
 function saveGlobalAll(messagesObj) {
@@ -135,7 +146,7 @@ function saveGlobalAll(messagesObj) {
   };
 
   try {
-    localStorage.setItem(GLOBAL_KEY, JSON.stringify(updated));
+    localStorage.setItem(getGlobalKey(), JSON.stringify(updated));
   } catch {
     // ignore
   }

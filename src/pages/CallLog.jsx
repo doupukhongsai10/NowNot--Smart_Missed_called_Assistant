@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import contactsStore from '../store/contactsStore';
+import callLogStore from '../store/callLogStore';
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -311,16 +312,15 @@ function ContactListModal({ onClose, onSelectContact }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-bg-void/80 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-md"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="w-full max-w-[480px] rounded-t-3xl p-6 pb-24 flex flex-col space-y-4 shadow-2xl overflow-y-auto"
+        className="w-full max-w-[480px] rounded-3xl p-6 flex flex-col space-y-4 shadow-2xl overflow-y-auto"
         style={{
           background: 'linear-gradient(180deg, #1E2240 0%, #0c0d14 100%)',
           border: '1px solid rgba(255,255,255,0.15)',
-          borderBottom: 'none',
-          maxHeight: '92dvh',
+          maxHeight: 'calc(100vh - 100px)',
         }}
       >
         {/* Handle */}
@@ -509,16 +509,15 @@ function KeypadModal({ onClose, initialDigits = '' }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-bg-void/80 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-md"
       onClick={(e) => e.target === e.currentTarget && !callingState && onClose()}
     >
       <div
-        className="w-full max-w-[480px] rounded-t-3xl p-6 pb-24 flex flex-col space-y-4 shadow-2xl overflow-y-auto"
+        className="w-full max-w-[480px] rounded-3xl p-6 flex flex-col space-y-4 shadow-2xl overflow-y-auto"
         style={{
           background: 'linear-gradient(180deg, #1E2240 0%, #0c0d14 100%)',
           border: '1px solid rgba(255,255,255,0.15)',
-          borderBottom: 'none',
-          maxHeight: '92dvh',
+          maxHeight: 'calc(100vh - 100px)',
         }}
       >
         {/* Handle */}
@@ -532,14 +531,28 @@ function KeypadModal({ onClose, initialDigits = '' }) {
             <span className="material-symbols-outlined text-primary text-xl">dialpad</span>
             <h2 className="font-display font-bold text-lg text-primary">Phone Keypad</h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-xl text-outline-variant hover:text-on-surface transition-colors cursor-pointer"
-            style={{ border: '1px solid rgba(255,255,255,0.08)' }}
-          >
-            <span className="material-symbols-outlined text-lg">close</span>
-          </button>
+          
+          <div className="flex items-center gap-2">
+            {digits.length > 0 && !callingState && !showSaveForm && (
+              <button
+                type="button"
+                onClick={() => setShowSaveForm(true)}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-primary/20 border border-primary/40 text-primary hover:bg-primary/30 active:scale-95 shadow-sm"
+                title="Save entered number to contacts"
+              >
+                <span className="material-symbols-outlined text-sm">person_add</span>
+                <span>Save Contact</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-xl text-outline-variant hover:text-on-surface transition-colors cursor-pointer"
+              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              <span className="material-symbols-outlined text-lg">close</span>
+            </button>
+          </div>
         </div>
 
         {/* Toast alert */}
@@ -666,35 +679,21 @@ function KeypadModal({ onClose, initialDigits = '' }) {
         ) : (
           <>
             {/* ── Digit Display Screen ── */}
-            <div className="space-y-2">
-              <div className="relative bg-bg-surface/80 border border-white/10 rounded-2xl px-4 py-3 flex items-center justify-between min-h-[56px]">
-                <span
-                  className="font-mono font-bold text-2xl text-on-surface tracking-wider overflow-x-auto whitespace-nowrap scrollbar-none"
-                  style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                >
-                  {digits || <span className="text-outline-variant/40 text-lg font-normal">Enter phone number...</span>}
-                </span>
+            <div className="relative bg-bg-surface/80 border border-white/10 rounded-2xl px-4 py-3 flex items-center justify-between min-h-[56px]">
+              <span
+                className="font-mono font-bold text-2xl text-on-surface tracking-wider overflow-x-auto whitespace-nowrap scrollbar-none"
+                style={{ fontFamily: "'JetBrains Mono', monospace" }}
+              >
+                {digits || <span className="text-outline-variant/40 text-lg font-normal">Enter phone number...</span>}
+              </span>
 
-                {digits.length > 0 && (
-                  <button
-                    onClick={handleBackspace}
-                    className="p-2 text-outline-variant hover:text-on-surface transition-colors cursor-pointer flex-shrink-0"
-                    title="Backspace"
-                  >
-                    <span className="material-symbols-outlined text-xl">backspace</span>
-                  </button>
-                )}
-              </div>
-
-              {/* "+ Save to Contacts" option when digits are entered */}
               {digits.length > 0 && (
                 <button
-                  type="button"
-                  onClick={() => setShowSaveForm(true)}
-                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 active:scale-98"
+                  onClick={handleBackspace}
+                  className="p-2 text-outline-variant hover:text-on-surface transition-colors cursor-pointer flex-shrink-0"
+                  title="Backspace"
                 >
-                  <span className="material-symbols-outlined text-sm">person_add</span>
-                  Save {digits} to Contacts
+                  <span className="material-symbols-outlined text-xl">backspace</span>
                 </button>
               )}
             </div>
@@ -766,15 +765,26 @@ function EmptyState({ filter, searchQuery }) {
 export default function CallLog() {
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [logs] = useState(SAMPLE_LOGS);
+  const [logs, setLogs] = useState(() => callLogStore.getAll());
   const [allContacts, setAllContacts] = useState([]);
   const [showKeypad, setShowKeypad] = useState(false);
   const [showContactList, setShowContactList] = useState(false);
   const [keypadInitialDigits, setKeypadInitialDigits] = useState('');
 
-  // Load saved contacts
-  useEffect(() => {
+  // Load saved contacts & call logs
+  const refresh = () => {
     setAllContacts(contactsStore.getAll());
+    setLogs(callLogStore.getAll());
+  };
+
+  useEffect(() => {
+    refresh();
+    window.addEventListener('storage', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('focus', refresh);
+    };
   }, [showContactList, showKeypad]);
 
   // Filter Call Logs by filter tab and search query

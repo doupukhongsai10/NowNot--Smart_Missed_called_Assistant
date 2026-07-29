@@ -1,4 +1,11 @@
-const KEY = 'nn_schedules';
+import authStore from './authStore';
+
+const BASE_KEY = 'schedules';
+
+function getKey() {
+  const userId = authStore.getCurrentUserId();
+  return `nn_${userId}_${BASE_KEY}`;
+}
 
 const DEFAULT_SCHEDULES = [
   {
@@ -37,15 +44,16 @@ const DEFAULT_SCHEDULES = [
 ];
 
 /**
- * Reads all stored schedules from localStorage.
+ * Reads all stored schedules from localStorage for current user.
  * Seeds default schedules if localStorage is empty.
  * @returns {Array} List of schedule objects
  */
 function getAll() {
+  const key = getKey();
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) {
-      localStorage.setItem(KEY, JSON.stringify(DEFAULT_SCHEDULES));
+      localStorage.setItem(key, JSON.stringify(DEFAULT_SCHEDULES));
       return DEFAULT_SCHEDULES;
     }
     const parsed = JSON.parse(raw);
@@ -65,7 +73,7 @@ function getById(id) {
 }
 
 /**
- * Saves a new or updated schedule to localStorage.
+ * Saves a new or updated schedule to localStorage for current user.
  * @param {Object} schedule
  * @returns {Array} Updated list of schedules
  */
@@ -93,7 +101,7 @@ function save(schedule) {
   }
 
   try {
-    localStorage.setItem(KEY, JSON.stringify(updated));
+    localStorage.setItem(getKey(), JSON.stringify(updated));
   } catch {
     // ignore quota error
   }
@@ -111,7 +119,7 @@ function toggle(id) {
     s.id === id ? { ...s, enabled: !s.enabled } : s
   );
   try {
-    localStorage.setItem(KEY, JSON.stringify(updated));
+    localStorage.setItem(getKey(), JSON.stringify(updated));
   } catch {
     // ignore
   }
@@ -127,7 +135,7 @@ function remove(id) {
   const schedules = getAll();
   const updated = schedules.filter((s) => s.id !== id);
   try {
-    localStorage.setItem(KEY, JSON.stringify(updated));
+    localStorage.setItem(getKey(), JSON.stringify(updated));
   } catch {
     // ignore
   }

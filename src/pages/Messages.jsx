@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import messageStore from '../store/messageStore';
-import useActiveStatus from '../hooks/useActiveStatus';
+import { useStatusContext } from '../context/StatusContext';
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -393,7 +393,7 @@ function GroupCard({ group, message, updatedAt, onEdit, onTest }) {
 // ── Main Messages Page ─────────────────────────────────────────────────────────
 
 export default function Messages() {
-  const { activeStatus } = useActiveStatus();
+  const { activeStatus } = useStatusContext();
 
   const [data, setData] = useState(() => messageStore.getGlobal());
   const [editingGroup, setEditingGroup] = useState(null); // group config object

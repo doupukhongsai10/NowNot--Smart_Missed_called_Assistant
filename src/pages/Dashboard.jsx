@@ -1,5 +1,5 @@
-import React from 'react';
-import useActiveStatus from '../hooks/useActiveStatus';
+import React, { useState, useEffect } from 'react';
+import { useStatusContext } from '../context/StatusContext';
 import statusStore from '../store/statusStore';
 
 const INITIAL_LOGS = [
@@ -50,8 +50,23 @@ const INITIAL_LOGS = [
 ];
 
 export default function Dashboard({ onNavigate }) {
-  const { activeStatus, timeLeftStr, activate, deactivate } = useActiveStatus();
-  const statuses = statusStore.getAll().slice(0, 5); // top 5 for quick bento
+  const { activeStatus, timeLeftStr, activate, deactivate } = useStatusContext();
+  const [statuses, setStatuses] = useState(() => statusStore.getAll().slice(0, 5));
+
+  // Refresh statuses whenever Dashboard mounts or the localStorage key changes
+  // (covers: returning from create-status, edits from another page, etc.)
+  const refreshStatuses = () => setStatuses(statusStore.getAll().slice(0, 5));
+
+  useEffect(() => {
+    refreshStatuses();
+    // Also catch storage writes from other components/tabs
+    window.addEventListener('storage', refreshStatuses);
+    window.addEventListener('focus', refreshStatuses);
+    return () => {
+      window.removeEventListener('storage', refreshStatuses);
+      window.removeEventListener('focus', refreshStatuses);
+    };
+  }, []);
 
   const handleQuickActivate = (status) => {
     activate(status.id, status.defaultDurationMinutes || 60, 'manual');

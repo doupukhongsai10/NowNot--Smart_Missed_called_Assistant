@@ -4,7 +4,7 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
   { id: 'statuses', label: 'Statuses', icon: 'radio_button_checked' },
   { id: 'messages', label: 'Messages', icon: 'chat_bubble' },
-  { id: 'log', label: 'Log', icon: 'history' },
+  { id: 'log', label: 'Log', icon: 'call' },
   { id: 'scheduler', label: 'Scheduler', icon: 'calendar_today' },
 ];
 

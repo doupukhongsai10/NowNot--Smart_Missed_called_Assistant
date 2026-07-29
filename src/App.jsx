@@ -7,20 +7,25 @@ import Scheduler from './pages/Scheduler';
 import Messages from './pages/Messages';
 import CallLog from './pages/CallLog';
 import Settings from './pages/Settings';
+import Auth from './pages/Auth';
 import CreateStatusModal from './components/CreateStatusModal';
-import useActiveStatus from './hooks/useActiveStatus';
+import { StatusProvider, useStatusContext } from './context/StatusContext';
 import useScheduler from './hooks/useScheduler';
+import authStore from './store/authStore';
 
-export default function App() {
+/**
+ * AppShell — lives INSIDE <StatusProvider> so it can safely call useStatusContext().
+ * Handles routing, navigation history, and the scheduler tick loop.
+ */
+function AppShell() {
   const [activePage, setActivePage] = useState('dashboard');
   const [pageHistory, setPageHistory] = useState(['dashboard']);
   const [editingStatus, setEditingStatus] = useState(null);
-
-  // Active status — used by scheduler callback to trigger a re-render
-  const { refreshActiveStatus } = useActiveStatus();
+  const [currentUser, setCurrentUser] = useState(() => authStore.getSession());
 
   // Mount the 60-second scheduler tick loop for the lifetime of the app.
-  // Whenever it activates or deactivates a scheduled status, refresh UI state.
+  // refreshActiveStatus comes from the shared StatusContext so all pages update.
+  const { refreshActiveStatus } = useStatusContext();
   useScheduler({ onStatusChange: refreshActiveStatus });
 
   const navigateTo = (page, data = null) => {
@@ -44,7 +49,22 @@ export default function App() {
     }
   };
 
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
+    setActivePage('dashboard');
+  };
+
+  const handleLogout = () => {
+    authStore.logout();
+    setCurrentUser(null);
+    setActivePage('auth');
+  };
+
   const renderPage = () => {
+    if (activePage === 'auth') {
+      return <Auth onLoginSuccess={handleLoginSuccess} />;
+    }
+
     switch (activePage) {
       case 'dashboard':
         return <Dashboard onNavigate={navigateTo} />;
@@ -55,7 +75,7 @@ export default function App() {
           <CreateStatusModal
             initialStatus={editingStatus}
             onClose={handleBack}
-            onSave={handleBack}
+            onSave={() => { handleBack(); refreshActiveStatus(); }}
           />
         );
       case 'scheduler':
@@ -65,11 +85,18 @@ export default function App() {
       case 'log':
         return <CallLog />;
       case 'settings':
-        return <Settings />;
+        return <Settings onLogout={handleLogout} />;
+      case 'auth':
+        return <Auth onLoginSuccess={handleLoginSuccess} />;
       default:
         return <Dashboard onNavigate={navigateTo} />;
     }
   };
+
+  // If on Auth page, render Auth full screen
+  if (activePage === 'auth') {
+    return <Auth onLoginSuccess={handleLoginSuccess} />;
+  }
 
   // Keep bottom nav highlighting 'statuses' when on 'create-status'
   const navActiveTab = activePage === 'create-status' ? 'statuses' : activePage;
@@ -81,12 +108,13 @@ export default function App() {
       <div className="fixed bottom-[-8%] right-[-8%] w-[35%] h-[35%] bg-group-family/5 blur-[110px] pointer-events-none z-0 rounded-full" />
       <div className="fixed top-[40%] right-[-5%] w-[25%] h-[25%] bg-secondary/5 blur-[90px] pointer-events-none z-0 rounded-full" />
 
-      {/* Top Bar (hidden on create-status page since CreateStatusModal has its own top bar) */}
+      {/* Top Bar (hidden on create-status page) */}
       {activePage !== 'create-status' && (
         <Header
           activePage={activePage}
           onBack={handleBack}
           onOpenSettings={() => navigateTo('settings')}
+          onAuthClick={() => setActivePage('auth')}
         />
       )}
 
@@ -100,10 +128,22 @@ export default function App() {
         {renderPage()}
       </main>
 
-      {/* Bottom Nav Bar (hidden on create-status page for full screen modal view) */}
+      {/* Bottom Nav Bar */}
       {activePage !== 'create-status' && (
         <BottomNav activePage={navActiveTab} onNavigate={navigateTo} />
       )}
     </div>
+  );
+}
+
+/**
+ * App — the root component. Wraps everything in <StatusProvider> so all
+ * descendant components share the same activeStatus state instance.
+ */
+export default function App() {
+  return (
+    <StatusProvider>
+      <AppShell />
+    </StatusProvider>
   );
 }

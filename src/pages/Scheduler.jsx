@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import scheduleStore from '../store/scheduleStore';
 import statusStore from '../store/statusStore';
-import useActiveStatus from '../hooks/useActiveStatus';
+import { useStatusContext } from '../context/StatusContext';
 
 // Day abbreviations (0=Sun ... 6=Sat)
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -677,7 +677,7 @@ export default function Scheduler() {
   const [schedules, setSchedules] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
-  const { activeStatus } = useActiveStatus();
+  const { activeStatus } = useStatusContext();
 
   const load = useCallback(() => {
     setSchedules(scheduleStore.getAll());

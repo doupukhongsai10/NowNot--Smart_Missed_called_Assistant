@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import statusStore from '../store/statusStore';
-import useActiveStatus from '../hooks/useActiveStatus';
+import { useStatusContext } from '../context/StatusContext';
 
 export default function StatusManager({ onNavigate }) {
   const [statuses, setStatuses] = useState([]);
-  const { activeStatus, activate, deactivate } = useActiveStatus();
+  const { activeStatus, activate, deactivate } = useStatusContext();
   const [selectedDurationMap, setSelectedDurationMap] = useState({});
 
   useEffect(() => {

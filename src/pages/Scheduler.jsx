@@ -111,10 +111,176 @@ function nextOccurrence(sched) {
   return '';
 }
 
-// ── Add/Edit Routine Modal ────────────────────────────────────────────────────
+// ── Time helper functions for Scheduler ─────────────────────────────────────
+function parseTime24(timeStr = '09:00') {
+  if (!timeStr) return { h12: 9, minute: 0, period: 'AM' };
+  const [hStr, mStr] = timeStr.split(':');
+  let h = parseInt(hStr, 10) || 0;
+  const m = parseInt(mStr, 10) || 0;
+  const period = h >= 12 ? 'PM' : 'AM';
+  let h12 = h % 12;
+  if (h12 === 0) h12 = 12;
+  return { h12, minute: m, period };
+}
 
-function RoutineModal({ initial, onClose, onSave }) {
-  const allStatuses = statusStore.getAll();
+function formatTime12To24(h12, minute, period) {
+  let h24 = h12 % 12;
+  if (period === 'PM') h24 += 12;
+  const hStr = String(h24).padStart(2, '0');
+  const mStr = String(minute).padStart(2, '0');
+  return `${hStr}:${mStr}`;
+}
+
+function formatDisplay12(timeStr = '09:00') {
+  const { h12, minute, period } = parseTime24(timeStr);
+  const mStr = String(minute).padStart(2, '0');
+  return `${String(h12).padStart(2, '0')}:${mStr} ${period}`;
+}
+
+// ── Custom Time Picker Sheet Modal ──────────────────────────────────────────
+function TimePickerSheet({ title, initialTime, onConfirm, onClose }) {
+  const parsed = parseTime24(initialTime);
+  const [h12, setH12] = useState(parsed.h12);
+  const [minute, setMinute] = useState(parsed.minute);
+  const [period, setPeriod] = useState(parsed.period);
+
+  const handleAdjustHour = (delta) => {
+    setH12((prev) => {
+      let next = prev + delta;
+      if (next > 12) next = 1;
+      if (next < 1) next = 12;
+      return next;
+    });
+  };
+
+  const handleAdjustMin = (delta) => {
+    setMinute((prev) => {
+      let next = (prev + delta + 60) % 60;
+      return next;
+    });
+  };
+
+  const handleApply = () => {
+    const final24 = formatTime12To24(h12, minute, period);
+    onConfirm(final24);
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-bg-void/85 backdrop-blur-md"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        className="w-full max-w-[340px] rounded-3xl p-5 flex flex-col space-y-4 shadow-2xl border border-white/15"
+        style={{ background: 'linear-gradient(180deg, #1E2240 0%, #0c0d14 100%)' }}
+      >
+        <div className="flex justify-between items-center pb-2 border-b border-white/10">
+          <h3 className="font-display font-bold text-base text-primary">{title}</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 rounded-xl text-outline-variant hover:text-on-surface transition-colors cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-lg">close</span>
+          </button>
+        </div>
+
+        {/* Selected Time Display Preview */}
+        <div className="flex items-center justify-center gap-3 py-3 bg-white/5 rounded-2xl border border-white/10">
+          <span className="font-mono text-3xl font-bold text-white tracking-wider">
+            {String(h12).padStart(2, '0')}:{String(minute).padStart(2, '0')}
+          </span>
+          <span className="font-display text-sm font-bold px-2.5 py-1 rounded-lg bg-primary/20 text-primary border border-primary/30">
+            {period}
+          </span>
+        </div>
+
+        {/* Interactive Controls Grid */}
+        <div className="grid grid-cols-2 gap-3 pt-1">
+          {/* Hour Controls */}
+          <div className="flex flex-col items-center gap-1.5 p-3 bg-white/5 rounded-2xl border border-white/10">
+            <span className="text-[10px] font-semibold text-outline-variant uppercase">HOUR</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleAdjustHour(-1)}
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-lg font-bold text-on-surface flex items-center justify-center cursor-pointer"
+              >
+                -
+              </button>
+              <span className="font-mono text-lg font-bold text-primary w-6 text-center">{h12}</span>
+              <button
+                type="button"
+                onClick={() => handleAdjustHour(1)}
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-lg font-bold text-on-surface flex items-center justify-center cursor-pointer"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Minute Controls */}
+          <div className="flex flex-col items-center gap-1.5 p-3 bg-white/5 rounded-2xl border border-white/10">
+            <span className="text-[10px] font-semibold text-outline-variant uppercase">MINUTE</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleAdjustMin(-5)}
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-xs font-bold text-on-surface flex items-center justify-center cursor-pointer"
+              >
+                -5
+              </button>
+              <span className="font-mono text-lg font-bold text-primary w-6 text-center">{String(minute).padStart(2, '0')}</span>
+              <button
+                type="button"
+                onClick={() => handleAdjustMin(5)}
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-xs font-bold text-on-surface flex items-center justify-center cursor-pointer"
+              >
+                +5
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* AM / PM Selector Pill */}
+        <div className="flex rounded-xl p-1 bg-white/5 border border-white/10">
+          <button
+            type="button"
+            onClick={() => setPeriod('AM')}
+            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              period === 'AM' ? 'bg-primary text-on-primary shadow' : 'text-outline-variant hover:text-on-surface'
+            }`}
+          >
+            AM
+          </button>
+          <button
+            type="button"
+            onClick={() => setPeriod('PM')}
+            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              period === 'PM' ? 'bg-primary text-on-primary shadow' : 'text-outline-variant hover:text-on-surface'
+            }`}
+          >
+            PM
+          </button>
+        </div>
+
+        {/* Explicit OK / SET Button */}
+        <button
+          type="button"
+          onClick={handleApply}
+          className="w-full py-3 rounded-2xl font-display font-bold text-sm text-white flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
+          style={{ background: 'var(--gradient-primary)' }}
+        >
+          <span className="material-symbols-outlined text-lg">check_circle</span>
+          <span>OK (Set Time)</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ScheduleModal({ initial = null, allStatuses = [], onSave, onClose }) {
   const [form, setForm] = useState({
     name: '',
     emoji: '⏰',
@@ -128,6 +294,7 @@ function RoutineModal({ initial, onClose, onSave }) {
     ...initial,
   });
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [activePickerTarget, setActivePickerTarget] = useState(null); // 'start' | 'end' | null
   const isOther = form.statusId === '__other__';
 
   const QUICK_EMOJIS = ['⏰', '🧘', '💼', '📚', '🚗', '💪', '🏠', '🌙', '🎯', '🔕', '🎮', '🍽️'];
@@ -325,28 +492,43 @@ function RoutineModal({ initial, onClose, onSave }) {
 
           {/* Time range */}
           <div className="grid grid-cols-2 gap-3">
-            {[
-              { label: 'Start Time', key: 'startTime' },
-              { label: 'End Time', key: 'endTime' },
-            ].map(({ label, key }) => (
-              <div key={key} className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(210,187,255,0.55)', fontFamily: "'Inter',sans-serif" }}>
-                  {label}
-                </label>
-                <input
-                  type="time"
-                  value={form[key]}
-                  onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl text-sm font-mono outline-none cursor-pointer"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: '#e3e1ec',
-                    colorScheme: 'dark',
-                  }}
-                />
+            {/* Start Time Box */}
+            <div
+              onClick={() => setActivePickerTarget('start')}
+              className="bg-white/5 border border-white/10 hover:border-primary/40 rounded-xl p-3 flex flex-col gap-1 cursor-pointer transition-all active:scale-95 group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold tracking-wider text-outline-variant uppercase">START TIME</span>
+                <span className="material-symbols-outlined text-sm text-primary group-hover:scale-110 transition-transform">edit_calendar</span>
               </div>
-            ))}
+              <div className="flex items-center justify-between gap-1 mt-0.5">
+                <span className="font-mono text-sm font-bold text-on-surface">
+                  {formatDisplay12(form.startTime)}
+                </span>
+                <span className="text-[9px] font-bold text-primary bg-primary/15 px-1.5 py-0.5 rounded border border-primary/30">
+                  Set Time
+                </span>
+              </div>
+            </div>
+
+            {/* End Time Box */}
+            <div
+              onClick={() => setActivePickerTarget('end')}
+              className="bg-white/5 border border-white/10 hover:border-primary/40 rounded-xl p-3 flex flex-col gap-1 cursor-pointer transition-all active:scale-95 group"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold tracking-wider text-outline-variant uppercase">END TIME</span>
+                <span className="material-symbols-outlined text-sm text-primary group-hover:scale-110 transition-transform">edit_calendar</span>
+              </div>
+              <div className="flex items-center justify-between gap-1 mt-0.5">
+                <span className="font-mono text-sm font-bold text-on-surface">
+                  {formatDisplay12(form.endTime)}
+                </span>
+                <span className="text-[9px] font-bold text-primary bg-primary/15 px-1.5 py-0.5 rounded border border-primary/30">
+                  Set Time
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Days of week */}
@@ -402,6 +584,25 @@ function RoutineModal({ initial, onClose, onSave }) {
           </button>
         </div>
       </div>
+
+      {/* ── Time Picker Overlay Sheet ── */}
+      {activePickerTarget === 'start' && (
+        <TimePickerSheet
+          title="Set Start Time"
+          initialTime={form.startTime}
+          onConfirm={(val) => setForm((f) => ({ ...f, startTime: val }))}
+          onClose={() => setActivePickerTarget(null)}
+        />
+      )}
+
+      {activePickerTarget === 'end' && (
+        <TimePickerSheet
+          title="Set End Time"
+          initialTime={form.endTime}
+          onConfirm={(val) => setForm((f) => ({ ...f, endTime: val }))}
+          onClose={() => setActivePickerTarget(null)}
+        />
+      )}
     </div>
   );
 }

@@ -91,21 +91,27 @@ function save(status) {
   const statuses = getAll();
   const index = statuses.findIndex((s) => s.id === status.id);
 
-  let updated;
+  let targetStatus;
   if (index >= 0) {
-    updated = [...statuses];
-    updated[index] = { ...updated[index], ...status };
+    targetStatus = { ...statuses[index], ...status, updatedAt: Date.now() };
   } else {
-    const newStatus = {
+    targetStatus = {
       id: status.id || generateId('status'),
       name: status.name || 'Custom Status',
       emoji: status.emoji || '🎯',
       defaultDurationMinutes: Number(status.defaultDurationMinutes) || 60,
       isSystem: false,
       createdAt: Date.now(),
+      updatedAt: Date.now(),
+      ...status,
     };
-    updated = [newStatus, ...statuses];
   }
+
+  // Remove previous instance if present
+  const remaining = statuses.filter((s) => s.id !== targetStatus.id);
+
+  // Always place the newly created / updated status at the VERY TOP (index 0)
+  const updated = [targetStatus, ...remaining];
 
   try {
     localStorage.setItem(getKey(), JSON.stringify(updated));

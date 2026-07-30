@@ -7,8 +7,18 @@ export default function StatusManager({ onNavigate }) {
   const { activeStatus, activate, deactivate } = useStatusContext();
   const [selectedDurationMap, setSelectedDurationMap] = useState({});
 
-  useEffect(() => {
+  const refreshStatuses = () => {
     setStatuses(statusStore.getAll());
+  };
+
+  useEffect(() => {
+    refreshStatuses();
+    window.addEventListener('storage', refreshStatuses);
+    window.addEventListener('focus', refreshStatuses);
+    return () => {
+      window.removeEventListener('storage', refreshStatuses);
+      window.removeEventListener('focus', refreshStatuses);
+    };
   }, []);
 
   const handleActivate = (status) => {

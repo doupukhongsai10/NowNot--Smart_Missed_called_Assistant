@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/status_model.dart';
 import '../providers/app_provider.dart';
@@ -73,12 +74,18 @@ class _StatusEditorViewState extends State<StatusEditorView> {
     final isEditing = widget.statusToEdit != null;
 
     return Scaffold(
+      backgroundColor: AppTheme.bgBase,
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Status' : 'New Custom Status'),
+        backgroundColor: AppTheme.bgBase,
+        elevation: 0,
+        title: Text(
+          isEditing ? 'Edit Status' : 'New Custom Status',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: AppTheme.primaryLavender),
+        ),
         actions: [
           IconButton(
             onPressed: _saveStatus,
-            icon: const Icon(Icons.check, color: AppTheme.successGreen),
+            icon: const Icon(Icons.check, color: AppTheme.primaryLavender),
           ),
         ],
       ),
@@ -90,73 +97,79 @@ class _StatusEditorViewState extends State<StatusEditorView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               GlassContainer(
-                child: Column(
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 60,
-                          child: TextFormField(
-                            controller: _emojiController,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 24),
-                            decoration: const InputDecoration(
-                              labelText: 'Emoji',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
+                    SizedBox(
+                      width: 60,
+                      child: TextFormField(
+                        controller: _emojiController,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.notoColorEmoji(fontSize: 24),
+                        decoration: InputDecoration(
+                          labelText: 'Emoji',
+                          labelStyle: GoogleFonts.inter(color: AppTheme.primaryLavender),
+                          border: const OutlineInputBorder(),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _nameController,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
-                              labelText: 'Status Name',
-                              hintText: 'e.g. Focus Mode',
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (val) => val == null || val.isEmpty ? 'Required' : null,
-                          ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _nameController,
+                        style: GoogleFonts.inter(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Status Name',
+                          hintText: 'e.g. Focus Mode',
+                          labelStyle: GoogleFonts.inter(color: AppTheme.primaryLavender),
+                          border: const OutlineInputBorder(),
                         ),
-                      ],
+                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
               Text(
-                'Group-Tailored Auto-Reply Messages',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 18),
+                'Group-Tailored Messages',
+                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.onSurface),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
-                'Different contact groups will receive distinct messages when they call during this status.',
-                style: Theme.of(context).textTheme.bodyMedium,
+                'Specify distinct messages dispatched to different contact groups upon missed calls.',
+                style: GoogleFonts.inter(fontSize: 13, color: AppTheme.onSurfaceVariant),
               ),
               const SizedBox(height: 16),
 
-              _buildMessageField(
+              _buildGroupMessageCard(
                 controller: _familyMsgController,
-                label: 'Family Message 🏠',
-                hint: 'e.g. At dinner with family, will call back later!',
+                groupName: 'Family',
+                accentColor: AppTheme.groupFamily,
+                emojiIcon: '🏠',
+                hint: 'e.g. Having dinner with family, will call back later!',
               ),
               const SizedBox(height: 12),
-              _buildMessageField(
+              _buildGroupMessageCard(
                 controller: _friendsMsgController,
-                label: 'Friends Message 🤝',
+                groupName: 'Friends',
+                accentColor: AppTheme.groupFriends,
+                emojiIcon: '🤝',
                 hint: 'e.g. Out right now! Text me if urgent.',
               ),
               const SizedBox(height: 12),
-              _buildMessageField(
+              _buildGroupMessageCard(
                 controller: _workMsgController,
-                label: 'Work Message 💼',
+                groupName: 'Work',
+                accentColor: AppTheme.groupWork,
+                emojiIcon: '💼',
                 hint: 'e.g. In a meeting. Will check emails shortly.',
               ),
               const SizedBox(height: 12),
-              _buildMessageField(
+              _buildGroupMessageCard(
                 controller: _unknownMsgController,
-                label: 'Unknown Callers Message ❓',
+                groupName: 'Unknown Callers',
+                accentColor: AppTheme.groupUnknown,
+                emojiIcon: '❓',
                 hint: 'e.g. Unavailable right now. Auto-reply via NowNot.',
               ),
 
@@ -164,11 +177,15 @@ class _StatusEditorViewState extends State<StatusEditorView> {
               ElevatedButton(
                 onPressed: _saveStatus,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryAccent,
+                  backgroundColor: AppTheme.primaryContainer,
+                  foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(isEditing ? 'Update Status' : 'Save Status', style: const TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(
+                  isEditing ? 'Update Status' : 'Save Status',
+                  style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -177,23 +194,55 @@ class _StatusEditorViewState extends State<StatusEditorView> {
     );
   }
 
-  Widget _buildMessageField({
+  Widget _buildGroupMessageCard({
     required TextEditingController controller,
-    required String label,
+    required String groupName,
+    required Color accentColor,
+    required String emojiIcon,
     required String hint,
   }) {
     return GlassContainer(
-      padding: const EdgeInsets.all(12),
-      child: TextFormField(
-        controller: controller,
-        maxLines: 2,
-        style: const TextStyle(fontSize: 14, color: Colors.white),
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          alignLabelWithHint: true,
-          border: const OutlineInputBorder(),
-        ),
+      leftAccentColor: accentColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                emojiIcon,
+                style: GoogleFonts.notoColorEmoji(fontSize: 16),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                groupName,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: accentColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: controller,
+            maxLines: 2,
+            style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: GoogleFonts.inter(fontSize: 12, color: Colors.white30),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: accentColor.withOpacity(0.30)),
+              ),
+              enabledBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: AppTheme.glassBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: accentColor),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

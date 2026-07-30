@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/status_model.dart';
 import '../theme/app_theme.dart';
 import 'glass_container.dart';
@@ -29,7 +30,7 @@ class StatusTile extends StatelessWidget {
             ),
             child: Text(
               status.emoji,
-              style: const TextStyle(fontSize: 24),
+              style: GoogleFonts.notoColorEmoji(fontSize: 24),
             ),
           ),
           const SizedBox(width: 14),

@@ -180,7 +180,7 @@ export default function Dashboard({ onNavigate }) {
               <button
                 key={item.id}
                 onClick={() => handleQuickActivate(item)}
-                className="glass-card bento-btn p-4 flex flex-col items-center justify-center gap-2 cursor-pointer border"
+                className="glass-card bento-btn p-4 flex flex-col items-center justify-center gap-2 cursor-pointer border w-full h-full"
                 style={{
                   borderColor: isSelected ? 'rgba(210,187,255,0.45)' : 'transparent',
                   background: isSelected ? 'rgba(124,58,237,0.15)' : undefined,

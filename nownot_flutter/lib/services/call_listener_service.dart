@@ -1,17 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:telephony/telephony.dart';
 
 typedef CallStateCallback = void Function(CallState state, String? incomingNumber);
 
 class CallListenerService {
-  final Telephony _telephony = Telephony.instance;
   String? _lastRingingNumber;
   int? _lastRingingTimeMs;
 
   void startListening(CallStateCallback onCallStateChanged) {
-    _telephony.listenIncomingSms(
-      onNewMessage: (SmsMessage message) {},
-      listenInBackground: false,
-    );
+    if (kIsWeb) return;
+    try {
+      final telephony = Telephony.instance;
+      telephony.listenIncomingSms(
+        onNewMessage: (SmsMessage message) {},
+        listenInBackground: false,
+      );
+    } catch (_) {}
   }
 
   void handlePhoneStateChange({
@@ -28,7 +32,6 @@ class CallListenerService {
       _lastRingingTimeMs = null;
     } else if (stateStr == 'IDLE' && _lastRingingNumber != null) {
       final now = DateTime.now().millisecondsSinceEpoch;
-      // If it rang within the last 45 seconds and wasn't answered, it's a missed call!
       if (_lastRingingTimeMs != null && (now - _lastRingingTimeMs!) < 45000) {
         onMissedCall(_lastRingingNumber!);
       }

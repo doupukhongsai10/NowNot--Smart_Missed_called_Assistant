@@ -1,16 +1,20 @@
+import 'package:flutter/foundation.dart';
 import 'package:telephony/telephony.dart';
 
 class SmsService {
-  final Telephony _telephony = Telephony.instance;
-
   Future<bool> sendSms({
     required String recipient,
     required String message,
   }) async {
+    if (kIsWeb) {
+      debugPrint('SMS auto-reply simulated on Web: $recipient -> "$message"');
+      return true;
+    }
     try {
-      final bool? permissionsGranted = await _telephony.requestPhoneAndSmsPermissions;
+      final telephony = Telephony.instance;
+      final bool? permissionsGranted = await telephony.requestPhoneAndSmsPermissions;
       if (permissionsGranted == true) {
-        await _telephony.sendSms(
+        await telephony.sendSms(
           to: recipient,
           message: message,
           isMultipart: true,

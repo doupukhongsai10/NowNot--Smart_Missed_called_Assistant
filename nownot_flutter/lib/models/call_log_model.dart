@@ -17,6 +17,10 @@ class CallLogModel {
     required this.autoReplied,
   });
 
+  String get callerName => contactName;
+  String get callerGroup => groupTag;
+  DateTime get timestamp => DateTime.fromMillisecondsSinceEpoch(timestampMs);
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'phoneNumber': phoneNumber,

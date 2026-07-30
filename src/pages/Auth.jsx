@@ -28,50 +28,50 @@ export default function Auth({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen w-full relative flex flex-col items-center justify-center p-4 overflow-hidden select-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
-      {/* Background Image / Ambient Blur */}
+    <div className="min-h-screen w-full relative flex flex-col items-center justify-center p-4 overflow-hidden select-none" style={{ fontFamily: "'Inter', sans-serif" }}>
+      {/* Background Image / Moody Dusk Mountains */}
       <div 
-        className="absolute inset-0 z-0 bg-cover bg-center filter brightness-95 scale-105 transition-all duration-700"
+        className="absolute inset-0 z-0 bg-cover bg-center filter brightness-90 scale-105 transition-all duration-700"
         style={{
           backgroundImage: `url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&q=80')`,
         }}
       />
-      {/* Frosted Background Overlay */}
-      <div className="absolute inset-0 z-0 bg-slate-900/40 backdrop-blur-md" />
+      {/* Dark Ambient Overlay */}
+      <div className="absolute inset-0 z-0 bg-[#0B0D1A]/60 backdrop-blur-md" />
 
       {/* Main Container */}
-      <div className="relative z-10 w-full max-w-md flex flex-col items-center space-y-6 py-8">
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center space-y-6 py-6">
         
         {/* ── Brand Logo & Tagline ── */}
-        <div className="text-center space-y-1">
+        <div className="text-center space-y-1.5">
           <div className="flex items-center justify-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#7C3AED] shadow-[0_0_12px_#7C3AED]" />
+            <span className="w-3 h-3 rounded-full bg-[#7C3AED] shadow-[0_0_14px_#7C3AED]" />
             <h1 className="font-display font-extrabold text-4xl text-white tracking-tight">
               NowNot
             </h1>
           </div>
-          <p className="text-sm font-medium text-slate-200/90 tracking-wide font-sans">
+          <p className="text-xs font-medium text-slate-300 tracking-wide">
             Your calls, intelligently handled.
           </p>
         </div>
 
-        {/* ── Morning Mist Translucent Glass Card ── */}
+        {/* ── Dark Glassmorphic Login Card ── */}
         <div
-          className="w-full rounded-3xl p-8 shadow-2xl flex flex-col space-y-6 border"
+          className="w-full rounded-[28px] p-7 shadow-2xl flex flex-col space-y-5 border"
           style={{
-            background: 'rgba(249, 249, 255, 0.85)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            borderColor: 'rgba(255, 255, 255, 0.6)',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.25)',
+            background: 'rgba(20, 24, 45, 0.78)',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            borderColor: 'rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.55)',
           }}
         >
           {/* Card Title Header */}
           <div className="text-center space-y-1">
-            <h2 className="font-display font-bold text-2xl text-[#111C2D]">
+            <h2 className="font-display font-bold text-2xl text-white tracking-tight">
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </h2>
-            <p className="text-xs text-[#4A4455] font-sans">
+            <p className="text-xs text-slate-400">
               {isSignUp
                 ? 'Join NowNot to handle missed calls intelligently'
                 : 'Please enter your details to sign in'}
@@ -79,16 +79,16 @@ export default function Auth({ onLoginSuccess }) {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 font-sans">
+          <form onSubmit={handleSubmit} className="space-y-4">
             
             {/* Full Name Input (Sign Up mode only) */}
             {isSignUp && (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#4A4455] block">
+                <label className="text-xs font-semibold text-slate-300 block">
                   Full Name
                 </label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-[#7B7487]">
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
                     person
                   </span>
                   <input
@@ -97,7 +97,7 @@ export default function Auth({ onLoginSuccess }) {
                     placeholder="John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm font-medium text-[#111C2D] bg-[#F0F3FF] border border-[#CCC3D8]/50 focus:outline-none focus:border-[#732EE4] focus:ring-2 focus:ring-[#732EE4]/20 transition-all placeholder:text-[#7B7487]/50"
+                    className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm font-medium text-white bg-[#131627]/80 border border-white/10 focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/30 transition-all placeholder:text-slate-500"
                   />
                 </div>
               </div>
@@ -105,11 +105,11 @@ export default function Auth({ onLoginSuccess }) {
 
             {/* Phone Number Input */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#4A4455] block">
+              <label className="text-xs font-semibold text-slate-300 block">
                 Phone Number
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-[#7B7487]">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
                   call
                 </span>
                 <input
@@ -118,32 +118,32 @@ export default function Auth({ onLoginSuccess }) {
                   placeholder="+44 7700 900000"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm font-mono font-medium text-[#111C2D] bg-[#F0F3FF] border border-[#CCC3D8]/50 focus:outline-none focus:border-[#732EE4] focus:ring-2 focus:ring-[#732EE4]/20 transition-all placeholder:text-[#7B7487]/50"
+                  className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm font-mono font-medium text-white bg-[#131627]/80 border border-white/10 focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/30 transition-all placeholder:text-slate-500"
                 />
               </div>
             </div>
 
             {/* Password Input */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#4A4455] block">
+              <label className="text-xs font-semibold text-slate-300 block">
                 Password
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-[#7B7487]">
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-slate-400">
                   lock
                 </span>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  placeholder="••••••••"
+                  placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-11 py-3 rounded-2xl text-sm font-medium text-[#111C2D] bg-[#F0F3FF] border border-[#CCC3D8]/50 focus:outline-none focus:border-[#732EE4] focus:ring-2 focus:ring-[#732EE4]/20 transition-all placeholder:text-[#7B7487]/50"
+                  className="w-full pl-11 pr-11 py-3 rounded-2xl text-sm font-medium text-white bg-[#131627]/80 border border-white/10 focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/30 transition-all placeholder:text-slate-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#7B7487] hover:text-[#111C2D] transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
                 >
                   <span className="material-symbols-outlined text-lg">
                     {showPassword ? 'visibility_off' : 'visibility'}
@@ -157,8 +157,8 @@ export default function Auth({ onLoginSuccess }) {
               type="submit"
               className="w-full py-3.5 px-6 rounded-2xl text-sm font-semibold text-white flex items-center justify-center gap-2 shadow-lg transition-all duration-200 active:scale-98 cursor-pointer mt-2"
               style={{
-                background: 'linear-gradient(135deg, #7C3AED 0%, #630ED4 100%)',
-                boxShadow: '0 8px 24px rgba(124, 58, 237, 0.4)',
+                background: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)',
+                boxShadow: '0 8px 24px rgba(124, 58, 237, 0.45)',
               }}
             >
               <span>{isSignUp ? 'Sign Up' : 'Log In'}</span>
@@ -167,20 +167,20 @@ export default function Auth({ onLoginSuccess }) {
           </form>
 
           {/* ── Divider ── */}
-          <div className="relative flex items-center justify-center my-2 font-sans">
-            <div className="w-full h-px bg-[#CCC3D8]/40" />
-            <span className="absolute px-3 bg-[#F9F9FF] text-[10px] font-bold text-[#7B7487] tracking-wider uppercase rounded-full">
+          <div className="relative flex items-center justify-center my-1.5 font-sans">
+            <div className="w-full h-px bg-white/10" />
+            <span className="absolute px-3.5 py-0.5 bg-[#131627] text-[10px] font-bold text-slate-400 tracking-wider uppercase rounded-full border border-white/10">
               OR CONTINUE WITH
             </span>
           </div>
 
           {/* ── Social Logins ── */}
-          <div className="grid grid-cols-2 gap-3 font-sans">
+          <div className="grid grid-cols-2 gap-3">
             {/* Google Button */}
             <button
               type="button"
               onClick={() => handleSocialLogin('Google')}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-white border border-[#CCC3D8]/60 text-xs font-semibold text-[#111C2D] hover:bg-slate-50 transition-all active:scale-95 cursor-pointer shadow-sm"
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#131627]/90 border border-white/15 text-xs font-semibold text-white hover:bg-white/10 transition-all active:scale-95 cursor-pointer shadow-sm"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -207,9 +207,9 @@ export default function Auth({ onLoginSuccess }) {
             <button
               type="button"
               onClick={() => handleSocialLogin('GitHub')}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-white border border-[#CCC3D8]/60 text-xs font-semibold text-[#111C2D] hover:bg-slate-50 transition-all active:scale-95 cursor-pointer shadow-sm"
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#131627]/90 border border-white/15 text-xs font-semibold text-white hover:bg-white/10 transition-all active:scale-95 cursor-pointer shadow-sm"
             >
-              <svg className="w-4 h-4 text-[#111C2D]" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -222,7 +222,7 @@ export default function Auth({ onLoginSuccess }) {
         </div>
 
         {/* ── Footer Switch Link ── */}
-        <p className="text-xs text-slate-200 font-medium font-sans">
+        <p className="text-xs text-slate-300 font-medium">
           {isSignUp ? (
             <>
               Already have an account?{' '}

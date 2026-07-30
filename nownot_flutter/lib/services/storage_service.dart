@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/status_model.dart';
 import '../models/active_status_model.dart';
@@ -12,18 +13,51 @@ class StorageService {
   static const String _kCallLogsKey = 'nownot_call_logs';
   static const String _kContactGroupsKey = 'nownot_contact_groups';
 
-  final SharedPreferences _prefs;
+  final SharedPreferences? _prefs;
+  final Map<String, String> _memoryCache = {};
 
   StorageService(this._prefs);
 
   static Future<StorageService> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    return StorageService(prefs);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return StorageService(prefs);
+    } catch (e) {
+      debugPrint('SharedPreferences init fallback: $e');
+      return StorageService(null);
+    }
+  }
+
+  String? _getString(String key) {
+    if (_prefs != null) {
+      try {
+        return _prefs.getString(key);
+      } catch (_) {}
+    }
+    return _memoryCache[key];
+  }
+
+  Future<void> _setString(String key, String value) async {
+    _memoryCache[key] = value;
+    if (_prefs != null) {
+      try {
+        await _prefs.setString(key, value);
+      } catch (_) {}
+    }
+  }
+
+  Future<void> _remove(String key) async {
+    _memoryCache.remove(key);
+    if (_prefs != null) {
+      try {
+        await _prefs.remove(key);
+      } catch (_) {}
+    }
   }
 
   // Statuses
   List<StatusModel> getStatuses() {
-    final jsonString = _prefs.getString(_kStatusesKey);
+    final jsonString = _getString(_kStatusesKey);
     if (jsonString == null || jsonString.isEmpty) {
       final defaults = StatusModel.defaultStatuses;
       saveStatuses(defaults);
@@ -35,12 +69,12 @@ class StorageService {
 
   Future<void> saveStatuses(List<StatusModel> statuses) async {
     final encoded = jsonEncode(statuses.map((e) => e.toJson()).toList());
-    await _prefs.setString(_kStatusesKey, encoded);
+    await _setString(_kStatusesKey, encoded);
   }
 
   // Active Status
   ActiveStatusModel? getActiveStatus() {
-    final jsonString = _prefs.getString(_kActiveStatusKey);
+    final jsonString = _getString(_kActiveStatusKey);
     if (jsonString == null || jsonString.isEmpty) return null;
     try {
       final decoded = jsonDecode(jsonString);
@@ -57,16 +91,16 @@ class StorageService {
 
   Future<void> saveActiveStatus(ActiveStatusModel activeStatus) async {
     final encoded = jsonEncode(activeStatus.toJson());
-    await _prefs.setString(_kActiveStatusKey, encoded);
+    await _setString(_kActiveStatusKey, encoded);
   }
 
   Future<void> clearActiveStatus() async {
-    await _prefs.remove(_kActiveStatusKey);
+    await _remove(_kActiveStatusKey);
   }
 
   // Schedules
   List<ScheduleModel> getSchedules() {
-    final jsonString = _prefs.getString(_kSchedulesKey);
+    final jsonString = _getString(_kSchedulesKey);
     if (jsonString == null || jsonString.isEmpty) return [];
     final List<dynamic> decoded = jsonDecode(jsonString);
     return decoded.map((e) => ScheduleModel.fromJson(e)).toList();
@@ -74,12 +108,12 @@ class StorageService {
 
   Future<void> saveSchedules(List<ScheduleModel> schedules) async {
     final encoded = jsonEncode(schedules.map((e) => e.toJson()).toList());
-    await _prefs.setString(_kSchedulesKey, encoded);
+    await _setString(_kSchedulesKey, encoded);
   }
 
   // Call Logs
   List<CallLogModel> getCallLogs() {
-    final jsonString = _prefs.getString(_kCallLogsKey);
+    final jsonString = _getString(_kCallLogsKey);
     if (jsonString == null || jsonString.isEmpty) return [];
     final List<dynamic> decoded = jsonDecode(jsonString);
     return decoded.map((e) => CallLogModel.fromJson(e)).toList();
@@ -87,7 +121,7 @@ class StorageService {
 
   Future<void> saveCallLogs(List<CallLogModel> logs) async {
     final encoded = jsonEncode(logs.map((e) => e.toJson()).toList());
-    await _prefs.setString(_kCallLogsKey, encoded);
+    await _setString(_kCallLogsKey, encoded);
   }
 
   Future<void> addCallLog(CallLogModel log) async {
@@ -98,7 +132,7 @@ class StorageService {
 
   // Contact Groups Mapping
   Map<String, String> getContactGroups() {
-    final jsonString = _prefs.getString(_kContactGroupsKey);
+    final jsonString = _getString(_kContactGroupsKey);
     if (jsonString == null || jsonString.isEmpty) return {};
     return Map<String, String>.from(jsonDecode(jsonString));
   }
@@ -106,6 +140,6 @@ class StorageService {
   Future<void> setContactGroup(String phoneNumber, String groupTag) async {
     final current = getContactGroups();
     current[phoneNumber] = groupTag;
-    await _prefs.setString(_kContactGroupsKey, jsonEncode(current));
+    await _setString(_kContactGroupsKey, jsonEncode(current));
   }
 }

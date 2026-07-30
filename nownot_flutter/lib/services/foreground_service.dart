@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 class ForegroundServiceManager {
   static void initService() {
+    if (kIsWeb) return;
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'nownot_foreground_service',
@@ -27,6 +29,7 @@ class ForegroundServiceManager {
     required String statusTitle,
     required String statusMessage,
   }) async {
+    if (kIsWeb) return true;
     if (await FlutterForegroundTask.isRunningService) {
       final res = await FlutterForegroundTask.updateService(
         notificationTitle: statusTitle,
@@ -44,6 +47,7 @@ class ForegroundServiceManager {
   }
 
   static Future<bool> stopService() async {
+    if (kIsWeb) return true;
     final res = await FlutterForegroundTask.stopService();
     return res.toString().contains('success');
   }

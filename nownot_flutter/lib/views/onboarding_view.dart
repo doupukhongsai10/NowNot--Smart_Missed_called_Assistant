@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../theme/app_theme.dart';
@@ -15,18 +16,30 @@ class _OnboardingViewState extends State<OnboardingView> {
   bool _isLoading = false;
 
   Future<void> _requestPermissionsAndProceed() async {
+    if (kIsWeb) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const DashboardView()),
+        );
+      }
+      return;
+    }
+
     setState(() => _isLoading = true);
 
-    await [
-      Permission.phone,
-      Permission.sms,
-      Permission.contacts,
-      Permission.notification,
-    ].request();
-
-    setState(() => _isLoading = false);
+    try {
+      await [
+        Permission.phone,
+        Permission.sms,
+        Permission.contacts,
+        Permission.notification,
+      ].request();
+    } catch (e) {
+      debugPrint('Permission request error: $e');
+    }
 
     if (mounted) {
+      setState(() => _isLoading = false);
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const DashboardView()),
       );
@@ -111,7 +124,11 @@ class _OnboardingViewState extends State<OnboardingView> {
                   ),
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
                     : const Text(
                         'Grant Permissions & Get Started',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

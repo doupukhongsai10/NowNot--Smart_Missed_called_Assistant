@@ -4,7 +4,7 @@ import 'services/storage_service.dart';
 import 'services/foreground_service.dart';
 import 'providers/app_provider.dart';
 import 'theme/app_theme.dart';
-import 'views/onboarding_view.dart';
+import 'views/login_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +32,7 @@ class NowNotApp extends StatelessWidget {
       title: 'NowNot Assistant',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const OnboardingView(),
+      home: const LoginView(),
     );
   }
 }

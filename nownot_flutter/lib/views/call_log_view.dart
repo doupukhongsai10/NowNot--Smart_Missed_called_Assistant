@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/app_provider.dart';
@@ -8,85 +9,99 @@ import '../widgets/glass_container.dart';
 class CallLogView extends StatelessWidget {
   const CallLogView({super.key});
 
+  Color _getGroupColor(String groupTag) {
+    switch (groupTag.toLowerCase()) {
+      case 'family':
+        return AppTheme.groupFamily;
+      case 'friends':
+        return AppTheme.groupFriends;
+      case 'work':
+        return AppTheme.groupWork;
+      default:
+        return AppTheme.groupUnknown;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
     final logs = provider.callLogs;
 
     return Scaffold(
+      backgroundColor: AppTheme.bgBase,
       appBar: AppBar(
-        title: const Text('Missed Call History'),
+        backgroundColor: AppTheme.bgBase,
+        elevation: 0,
+        title: Text(
+          'Missed Call Activity',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: AppTheme.primaryLavender),
+        ),
       ),
       body: logs.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
                 'No missed calls recorded.',
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
+                style: GoogleFonts.inter(color: AppTheme.onSurfaceVariant, fontSize: 15),
               ),
             )
           : ListView.builder(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               itemCount: logs.length,
               itemBuilder: (context, index) {
                 final log = logs[index];
-                final dateStr = DateFormat('MMM dd, hh:mm a').format(
+                final groupColor = _getGroupColor(log.groupTag);
+                final dateStr = DateFormat('HH:mm').format(
                   DateTime.fromMillisecondsSinceEpoch(log.timestampMs),
                 );
 
                 return GlassContainer(
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: 10),
+                  leftAccentColor: groupColor,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.phone_missed, color: AppTheme.dangerRose, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                log.contactName.isNotEmpty ? log.contactName : log.phoneNumber,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                            ],
+                          Text(
+                            log.contactName.isNotEmpty ? log.contactName : log.phoneNumber,
+                            style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.onSurface),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppTheme.secondaryAccent.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              log.groupTag,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.secondaryAccent,
-                              ),
-                            ),
+                          Text(
+                            dateStr,
+                            style: GoogleFonts.jetBrainsMono(fontSize: 12, color: AppTheme.onSurfaceVariant.withOpacity(0.50)),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Phone: ${log.phoneNumber} • $dateStr',
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                      ),
-                      const Divider(color: AppTheme.glassBorder, height: 20),
+                      const SizedBox(height: 4),
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.reply, size: 16, color: AppTheme.textSecondary),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              log.messageSent,
-                              style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: Colors.white70),
-                            ),
+                          Text(
+                            'Missed Call · ',
+                            style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF958DA1)),
+                          ),
+                          Text(
+                            log.groupTag,
+                            style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: groupColor),
                           ),
                         ],
                       ),
+                      if (log.messageSent.isNotEmpty) ...[
+                        const Divider(color: AppTheme.glassBorder, height: 20),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.reply, size: 14, color: AppTheme.onSurfaceVariant.withOpacity(0.60)),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                log.messageSent,
+                                style: GoogleFonts.inter(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.white70),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 );

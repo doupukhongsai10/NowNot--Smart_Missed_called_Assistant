@@ -173,9 +173,6 @@ function ScrollWheelTimePickerSheet({ title, initialTime, onConfirm, onClose }) 
 
         {/* ── Scrollable Wheel Column Selectors ── */}
         <div className="grid grid-cols-3 gap-2 bg-black/40 p-3 rounded-2xl border border-white/10 relative">
-          {/* Highlight selection bar */}
-          <div className="absolute left-2 right-2 top-1/2 -translate-y-1/2 h-10 bg-primary/25 border-y border-primary/50 rounded-xl pointer-events-none" />
-
           {/* Hour Column (1 - 12) */}
           <div className="flex flex-col items-center">
             <span className="text-[11px] font-bold text-slate-200 uppercase mb-1 z-10">HOUR</span>

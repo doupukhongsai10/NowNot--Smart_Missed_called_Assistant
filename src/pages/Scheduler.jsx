@@ -148,19 +148,19 @@ function RoutineModal({ initial, onClose, onSave }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex items-start justify-center p-2.5 sm:p-4 pt-14 sm:pt-20 bg-bg-void/80 backdrop-blur-md"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="w-full max-w-[480px] rounded-3xl flex flex-col overflow-y-auto"
+        className="w-full max-w-[480px] rounded-2xl sm:rounded-3xl flex flex-col overflow-y-auto"
         style={{
           background: 'linear-gradient(180deg, #1E2240 0%, #12131a 100%)',
           border: '1px solid rgba(255,255,255,0.1)',
-          maxHeight: 'calc(100vh - 100px)',
+          maxHeight: 'calc(100vh - 80px)',
         }}
       >
         {/* Scrollable content area */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-5">
+        <div className="overflow-y-auto flex-1 p-3.5 sm:p-6 space-y-3.5 sm:space-y-5">
 
         {/* Handle */}
         <div className="flex justify-center -mt-1 mb-1">

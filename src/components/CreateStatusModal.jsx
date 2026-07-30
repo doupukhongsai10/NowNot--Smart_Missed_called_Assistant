@@ -170,16 +170,16 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
   return (
     <div className="fixed inset-0 z-[100] overflow-y-auto bg-bg-base/95 backdrop-blur-xl flex flex-col">
       {/* ── Top Bar ── */}
-      <header className="sticky top-0 z-10 flex items-center justify-between px-4 h-16 bg-bg-base/80 backdrop-blur-md border-b border-white/10">
+      <header className="sticky top-0 z-10 flex items-center justify-between px-2.5 sm:px-4 h-14 sm:h-16 bg-bg-base/80 backdrop-blur-md border-b border-white/10">
         <button
           type="button"
           onClick={onClose}
-          className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-on-surface"
+          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-on-surface flex-shrink-0"
         >
-          <span className="material-symbols-outlined text-xl">arrow_back</span>
+          <span className="material-symbols-outlined text-lg sm:text-xl">arrow_back</span>
         </button>
 
-        <h2 className="font-display font-semibold text-base text-on-surface">
+        <h2 className="font-display font-semibold text-sm sm:text-base text-on-surface truncate px-2">
           {initialStatus ? 'Edit Status' : 'Create New Status'}
         </h2>
 
@@ -187,7 +187,7 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
           type="button"
           onClick={handleSave}
           disabled={!name.trim()}
-          className="px-5 py-2 rounded-full text-xs font-semibold text-white transition-all active:scale-95 disabled:opacity-50"
+          className="px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full text-xs font-semibold text-white transition-all active:scale-95 disabled:opacity-50 flex-shrink-0"
           style={{ background: 'var(--gradient-primary)' }}
         >
           Save
@@ -195,17 +195,17 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
       </header>
 
       {/* ── Content Form ── */}
-      <form onSubmit={handleSave} className="flex-1 max-w-md w-full mx-auto p-4 space-y-5 pb-24">
+      <form onSubmit={handleSave} className="flex-1 max-w-md w-full mx-auto p-3 sm:p-4 space-y-4 sm:space-y-5 pb-24">
         {/* ── Status Name Card ── */}
         {/* Outer wrapper elevates z-index when picker is open so it floats above sibling cards */}
         <div className="relative" style={{ zIndex: showEmojiPicker ? 50 : 'auto' }}>
-          <div className="glass-card p-4 flex items-center gap-4">
+          <div className="glass-card p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
             {/* Emoji Picker trigger button */}
             <div className="relative flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl bg-bg-surface border border-white/10 hover:border-primary/40 transition-all cursor-pointer"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl bg-bg-surface border border-white/10 hover:border-primary/40 transition-all cursor-pointer"
               >
                 {emoji}
               </button>

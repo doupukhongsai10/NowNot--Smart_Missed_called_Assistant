@@ -87,7 +87,7 @@ function save(schedule) {
     updated[index] = { ...updated[index], ...schedule };
   } else {
     const newSchedule = {
-      id: `sched-${crypto.randomUUID()}`,
+      id: generateId('sched'),
       name: schedule.name || 'New Routine',
       emoji: schedule.emoji || '⏰',
       statusId: schedule.statusId || null,

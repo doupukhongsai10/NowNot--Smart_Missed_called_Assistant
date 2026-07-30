@@ -28,7 +28,7 @@ export default function Auth({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen w-full relative flex flex-col items-center justify-center p-4 overflow-hidden select-none" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen w-full relative flex flex-col items-center justify-center p-2.5 sm:p-4 overflow-hidden select-none" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Background Image / Moody Dusk Mountains */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center filter brightness-90 scale-105 transition-all duration-700"
@@ -40,13 +40,13 @@ export default function Auth({ onLoginSuccess }) {
       <div className="absolute inset-0 z-0 bg-[#0B0D1A]/60 backdrop-blur-md" />
 
       {/* Main Container */}
-      <div className="relative z-10 w-full max-w-md flex flex-col items-center space-y-6 py-6">
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center space-y-4 sm:space-y-6 py-4 sm:py-6">
         
         {/* ── Brand Logo & Tagline ── */}
         <div className="text-center space-y-1.5">
           <div className="flex items-center justify-center gap-2">
             <span className="w-3 h-3 rounded-full bg-[#7C3AED] shadow-[0_0_14px_#7C3AED]" />
-            <h1 className="font-display font-extrabold text-4xl text-white tracking-tight">
+            <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-white tracking-tight">
               NowNot
             </h1>
           </div>
@@ -57,7 +57,7 @@ export default function Auth({ onLoginSuccess }) {
 
         {/* ── Dark Glassmorphic Login Card ── */}
         <div
-          className="w-full rounded-[28px] p-7 shadow-2xl flex flex-col space-y-5 border"
+          className="w-full rounded-2xl sm:rounded-[28px] p-4 xs:p-5 sm:p-7 shadow-2xl flex flex-col space-y-4 sm:space-y-5 border"
           style={{
             background: 'rgba(20, 24, 45, 0.78)',
             backdropFilter: 'blur(28px)',

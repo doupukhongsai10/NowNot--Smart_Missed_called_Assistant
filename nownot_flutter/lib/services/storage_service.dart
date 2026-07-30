@@ -12,6 +12,7 @@ class StorageService {
   static const String _kSchedulesKey = 'nownot_schedules';
   static const String _kCallLogsKey = 'nownot_call_logs';
   static const String _kContactGroupsKey = 'nownot_contact_groups';
+  static const String _kContactNamesKey = 'nownot_contact_names';
 
   final SharedPreferences? _prefs;
   final Map<String, String> _memoryCache = {};
@@ -141,5 +142,22 @@ class StorageService {
     final current = getContactGroups();
     current[phoneNumber] = groupTag;
     await _setString(_kContactGroupsKey, jsonEncode(current));
+  }
+
+  // Contact Names Mapping
+  Map<String, String> getContactNames() {
+    final jsonString = _getString(_kContactNamesKey);
+    if (jsonString == null || jsonString.isEmpty) return {};
+    return Map<String, String>.from(jsonDecode(jsonString));
+  }
+
+  Future<void> saveContact({required String phoneNumber, required String name, required String groupTag}) async {
+    final names = getContactNames();
+    names[phoneNumber] = name;
+    await _setString(_kContactNamesKey, jsonEncode(names));
+
+    final groups = getContactGroups();
+    groups[phoneNumber] = groupTag;
+    await _setString(_kContactGroupsKey, jsonEncode(groups));
   }
 }

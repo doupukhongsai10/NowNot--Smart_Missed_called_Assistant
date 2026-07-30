@@ -265,21 +265,21 @@ function StatsBar({ logs }) {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
       {stats.map((s) => (
         <div
           key={s.label}
-          className="rounded-2xl p-3 flex flex-col items-center gap-1"
+          className="rounded-xl sm:rounded-2xl p-2 sm:p-3 flex flex-col items-center gap-0.5 sm:gap-1"
           style={{
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.07)',
           }}
         >
-          <span className="material-symbols-outlined icon-filled text-lg" style={{ color: s.color }}>
+          <span className="material-symbols-outlined icon-filled text-base sm:text-lg" style={{ color: s.color }}>
             {s.icon}
           </span>
-          <span className="font-display font-bold text-xl" style={{ color: '#F1F5F9' }}>{s.value}</span>
-          <span className="text-[10px] uppercase tracking-wider" style={{ color: 'rgba(210,187,255,0.45)', fontFamily: "'Inter',sans-serif" }}>
+          <span className="font-display font-bold text-lg sm:text-xl" style={{ color: '#F1F5F9' }}>{s.value}</span>
+          <span className="text-[9px] sm:text-[10px] uppercase tracking-wider" style={{ color: 'rgba(210,187,255,0.45)', fontFamily: "'Inter',sans-serif" }}>
             {s.label}
           </span>
         </div>
@@ -312,15 +312,15 @@ function ContactListModal({ onClose, onSelectContact }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex items-start justify-center p-2.5 sm:p-4 pt-14 sm:pt-20 bg-bg-void/80 backdrop-blur-md"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="w-full max-w-[480px] rounded-3xl p-6 flex flex-col space-y-4 shadow-2xl overflow-y-auto"
+        className="w-full max-w-[480px] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 flex flex-col space-y-3 sm:space-y-4 shadow-2xl overflow-y-auto"
         style={{
           background: 'linear-gradient(180deg, #1E2240 0%, #0c0d14 100%)',
           border: '1px solid rgba(255,255,255,0.15)',
-          maxHeight: 'calc(100vh - 100px)',
+          maxHeight: 'calc(100vh - 80px)',
         }}
       >
         {/* Handle */}
@@ -509,15 +509,15 @@ function KeypadModal({ onClose, initialDigits = '' }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-20 bg-bg-void/80 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex items-start justify-center p-2.5 sm:p-4 pt-14 sm:pt-20 bg-bg-void/80 backdrop-blur-md"
       onClick={(e) => e.target === e.currentTarget && !callingState && onClose()}
     >
       <div
-        className="w-full max-w-[480px] rounded-3xl p-6 flex flex-col space-y-4 shadow-2xl overflow-y-auto"
+        className="w-full max-w-[480px] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 flex flex-col space-y-3 sm:space-y-4 shadow-2xl overflow-y-auto"
         style={{
           background: 'linear-gradient(180deg, #1E2240 0%, #0c0d14 100%)',
           border: '1px solid rgba(255,255,255,0.15)',
-          maxHeight: 'calc(100vh - 100px)',
+          maxHeight: 'calc(100vh - 80px)',
         }}
       >
         {/* Handle */}
@@ -699,18 +699,18 @@ function KeypadModal({ onClose, initialDigits = '' }) {
             </div>
 
             {/* ── Keypad Grid ── */}
-            <div className="grid grid-cols-3 gap-3 py-1">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 py-1">
               {KEYPAD_BUTTONS.map((item) => (
                 <button
                   key={item.digit}
                   onClick={() => handleDigitClick(item.digit)}
-                  className="flex flex-col items-center justify-center h-14 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+                  className="flex flex-col items-center justify-center h-11 sm:h-14 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
                 >
-                  <span className="font-mono text-xl font-bold text-on-surface leading-none">
+                  <span className="font-mono text-lg sm:text-xl font-bold text-on-surface leading-none">
                     {item.digit}
                   </span>
                   {item.sub && (
-                    <span className="text-[9px] font-bold text-outline-variant tracking-widest mt-0.5">
+                    <span className="text-[8px] sm:text-[9px] font-bold text-outline-variant tracking-widest mt-0.5">
                       {item.sub}
                     </span>
                   )}
@@ -723,14 +723,14 @@ function KeypadModal({ onClose, initialDigits = '' }) {
               <button
                 onClick={handleInitiateCall}
                 disabled={!digits.trim()}
-                className="w-16 h-16 rounded-full text-white flex items-center justify-center shadow-xl transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full text-white flex items-center justify-center shadow-xl transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
                   background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)',
                   boxShadow: '0 6px 24px rgba(34,197,94,0.4)',
                 }}
                 title="Make Call"
               >
-                <span className="material-symbols-outlined text-3xl">call</span>
+                <span className="material-symbols-outlined text-2xl sm:text-3xl">call</span>
               </button>
             </div>
           </>
@@ -1026,7 +1026,7 @@ export default function CallLog() {
           setKeypadInitialDigits('');
           setShowKeypad(true);
         }}
-        className="fixed bottom-20 right-4 md:right-[calc(50%-220px)] z-40 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-200 active:scale-90 cursor-pointer"
+        className="fixed bottom-16 sm:bottom-20 right-3 sm:right-4 md:right-[calc(50%-220px)] z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-200 active:scale-90 cursor-pointer"
         style={{
           background: 'var(--gradient-primary)',
           boxShadow: '0 8px 24px rgba(124,58,237,0.5)',

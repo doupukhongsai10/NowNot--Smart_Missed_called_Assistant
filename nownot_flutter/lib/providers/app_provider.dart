@@ -17,6 +17,7 @@ class AppProvider extends ChangeNotifier {
   List<ScheduleModel> _schedules = [];
   List<CallLogModel> _callLogs = [];
   Map<String, String> _contactGroups = {};
+  Map<String, String> _contactNames = {};
 
   Timer? _tickerTimer;
 
@@ -30,6 +31,7 @@ class AppProvider extends ChangeNotifier {
   List<ScheduleModel> get schedules => _schedules;
   List<CallLogModel> get callLogs => _callLogs;
   Map<String, String> get contactGroups => _contactGroups;
+  Map<String, String> get contactNames => _contactNames;
 
   void _loadAllData() {
     _statuses = _storage.getStatuses();
@@ -37,6 +39,7 @@ class AppProvider extends ChangeNotifier {
     _schedules = _storage.getSchedules();
     _callLogs = _storage.getCallLogs();
     _contactGroups = _storage.getContactGroups();
+    _contactNames = _storage.getContactNames();
     notifyListeners();
   }
 
@@ -193,6 +196,41 @@ class AppProvider extends ChangeNotifier {
   Future<void> setContactGroup(String phoneNumber, String groupTag) async {
     await _storage.setContactGroup(phoneNumber, groupTag);
     _contactGroups = _storage.getContactGroups();
+    notifyListeners();
+  }
+
+  // Save Contact (Name + Group)
+  Future<void> saveContact({
+    required String phoneNumber,
+    required String name,
+    required String groupTag,
+  }) async {
+    await _storage.saveContact(
+      phoneNumber: phoneNumber,
+      name: name,
+      groupTag: groupTag,
+    );
+    _contactNames = _storage.getContactNames();
+    _contactGroups = _storage.getContactGroups();
+
+    // Update any existing call logs for this number if needed
+    final updatedLogs = _callLogs.map((log) {
+      if (log.phoneNumber == phoneNumber) {
+        return CallLogModel(
+          id: log.id,
+          phoneNumber: log.phoneNumber,
+          contactName: name,
+          groupTag: groupTag,
+          messageSent: log.messageSent,
+          timestampMs: log.timestampMs,
+          autoReplied: log.autoReplied,
+        );
+      }
+      return log;
+    }).toList();
+
+    await _storage.saveCallLogs(updatedLogs);
+    _callLogs = _storage.getCallLogs();
     notifyListeners();
   }
 

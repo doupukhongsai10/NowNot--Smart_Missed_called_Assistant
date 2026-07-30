@@ -152,15 +152,15 @@ export default function StatusManager({ onNavigate }) {
               </div>
 
               {/* Quick Duration pill options (available anytime, including during active sessions) */}
-              <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2 text-xs">
-                <span className="text-[10px] text-outline-variant uppercase font-medium">
-                  {isActiveThis ? 'Set Active Duration:' : 'Quick Activate:'}
+              <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-1.5 text-xs overflow-x-auto no-scrollbar">
+                <span className="text-[9px] sm:text-[10px] text-outline-variant uppercase font-medium flex-shrink-0">
+                  {isActiveThis ? 'Set Duration:' : 'Activate:'}
                 </span>
                 {[30, 60, 120, 240, 480].map((mins) => (
                   <button
                     key={mins}
                     onClick={() => activate(status.id, mins, 'manual')}
-                    className="px-2 py-0.5 rounded-md text-[11px] font-medium transition-all active:scale-95 cursor-pointer bg-white/5 border border-white/10 text-outline-variant hover:text-primary hover:bg-primary/15 hover:border-primary/40"
+                    className="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-medium transition-all active:scale-95 cursor-pointer bg-white/5 border border-white/10 text-outline-variant hover:text-primary hover:bg-primary/15 hover:border-primary/40 flex-shrink-0"
                     title={isActiveThis ? `Reset active duration to ${mins >= 60 ? `${mins / 60}h` : `${mins}m`}` : `Activate for ${mins >= 60 ? `${mins / 60} hour(s)` : `${mins} mins`}`}
                   >
                     {mins >= 60 ? `${mins / 60}h` : `${mins}m`}

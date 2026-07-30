@@ -11,9 +11,9 @@ const NAV_ITEMS = [
 export default function BottomNav({ activePage, onNavigate }) {
   return (
     <nav
-      className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 pb-safe rounded-t-2xl"
+      className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-1 sm:px-2 py-1.5 pb-safe rounded-t-2xl"
       style={{
-        background: 'rgba(16,19,42,0.75)',
+        background: 'rgba(16,19,42,0.85)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
         borderTop: '1px solid rgba(255,255,255,0.07)',
@@ -26,7 +26,7 @@ export default function BottomNav({ activePage, onNavigate }) {
           <button
             key={item.id}
             onClick={() => onNavigate(item.id)}
-            className={`relative flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-all duration-200 ${
+            className={`relative flex flex-col items-center gap-0.5 px-1.5 sm:px-4 py-1 rounded-xl transition-all duration-200 ${
               isActive ? 'nav-active' : ''
             }`}
             style={{
@@ -38,14 +38,14 @@ export default function BottomNav({ activePage, onNavigate }) {
           >
             {isActive && (
               <span
-                className="absolute -top-1 w-6 h-1 rounded-full"
+                className="absolute -top-1 w-5 sm:w-6 h-1 rounded-full"
                 style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)' }}
               />
             )}
-            <span className={`material-symbols-outlined text-2xl ${isActive ? 'icon-filled' : ''}`}>
+            <span className={`material-symbols-outlined text-xl sm:text-2xl ${isActive ? 'icon-filled' : ''}`}>
               {item.icon}
             </span>
-            <span className="text-[10px] font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <span className="text-[9px] sm:text-[10px] font-semibold tracking-tighter sm:tracking-normal" style={{ fontFamily: "'Inter', sans-serif" }}>
               {item.label}
             </span>
           </button>

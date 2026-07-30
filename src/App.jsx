@@ -118,7 +118,7 @@ function AppShell() {
       {/* Main Content Area */}
       <main
         className={`relative ${
-          activePage === 'create-status' ? 'p-0' : 'pt-20 pb-28 px-4'
+          activePage === 'create-status' ? 'p-0' : 'pt-16 sm:pt-20 pb-24 sm:pb-28 px-2.5 sm:px-4'
         } mx-auto`}
         style={{ maxWidth: activePage === 'create-status' ? '100%' : 480 }}
       >

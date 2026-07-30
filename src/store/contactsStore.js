@@ -1,5 +1,6 @@
 import { saveContactsToCloud, fetchContactsFromCloud } from '../services/cloudinaryServices';
 import authStore from './authStore';
+import { generateId } from '../utils/idGenerator';
 
 const BASE_KEY = 'contacts';
 
@@ -40,7 +41,7 @@ function save(contact) {
     updated[index] = { ...updated[index], ...contact };
   } else {
     const newContact = {
-      id: contact.id || `contact-${crypto.randomUUID()}`,
+      id: contact.id || generateId('contact'),
       name: contact.name.trim(),
       phone: contact.phone.trim(),
       group: contact.group || 'Unknown',

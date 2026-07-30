@@ -1,4 +1,5 @@
 import authStore from './authStore';
+import { generateId } from '../utils/idGenerator';
 
 const BASE_KEY = 'statuses';
 
@@ -7,64 +8,63 @@ function getKey() {
   return `nn_${userId}_${BASE_KEY}`;
 }
 
-const DEFAULT_STATUSES = [
-  {
-    id: 'status-sleeping',
-    name: 'Sleeping',
-    emoji: '😴',
-    defaultDurationMinutes: 480, // 8 hours
-    isSystem: true,
-  },
+/**
+ * Default preset statuses if user has no saved statuses yet.
+ */
+export const DEFAULT_STATUSES = [
   {
     id: 'status-meeting',
     name: 'In a Meeting',
     emoji: '💼',
-    defaultDurationMinutes: 60, // 1 hour
-    isSystem: true,
-  },
-  {
-    id: 'status-studying',
-    name: 'Studying',
-    emoji: '📚',
-    defaultDurationMinutes: 120, // 2 hours
+    defaultDurationMinutes: 60,
     isSystem: true,
   },
   {
     id: 'status-driving',
     name: 'Driving',
     emoji: '🚗',
-    defaultDurationMinutes: 45, // 45 mins
+    defaultDurationMinutes: 30,
+    isSystem: true,
+  },
+  {
+    id: 'status-sleeping',
+    name: 'Sleeping',
+    emoji: '😴',
+    defaultDurationMinutes: 480,
+    isSystem: true,
+  },
+  {
+    id: 'status-studying',
+    name: 'Studying',
+    emoji: '📚',
+    defaultDurationMinutes: 120,
     isSystem: true,
   },
   {
     id: 'status-gym',
-    name: 'Gym',
+    name: 'At the Gym',
     emoji: '💪',
-    defaultDurationMinutes: 90, // 1.5 hours
+    defaultDurationMinutes: 90,
     isSystem: true,
   },
   {
     id: 'status-busy',
-    name: 'Do Not Disturb',
+    name: 'Busy',
     emoji: '🚫',
-    defaultDurationMinutes: 30, // 30 mins
+    defaultDurationMinutes: 60,
     isSystem: true,
   },
 ];
 
 /**
- * Reads all stored statuses from localStorage for current user.
- * Seeds default statuses if localStorage is empty for this user.
+ * Reads all statuses from localStorage for current user.
+ * Falls back to DEFAULT_STATUSES if none saved.
  * @returns {Array} List of status objects
  */
 function getAll() {
-  const key = getKey();
   try {
-    const raw = localStorage.getItem(key);
-    if (!raw) {
-      localStorage.setItem(key, JSON.stringify(DEFAULT_STATUSES));
-      return DEFAULT_STATUSES;
-    }
+    const raw = localStorage.getItem(getKey());
+    if (!raw) return DEFAULT_STATUSES;
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_STATUSES;
   } catch {
@@ -83,9 +83,9 @@ function getById(id) {
 }
 
 /**
- * Saves a new or updated status to localStorage for current user.
+ * Saves a new custom status or updates an existing one for current user.
  * @param {Object} status
- * @returns {Array} Updated list of statuses
+ * @returns {Array} Updated statuses list
  */
 function save(status) {
   const statuses = getAll();
@@ -97,7 +97,7 @@ function save(status) {
     updated[index] = { ...updated[index], ...status };
   } else {
     const newStatus = {
-      id: status.id || `status-${crypto.randomUUID()}`,
+      id: status.id || generateId('status'),
       name: status.name || 'Custom Status',
       emoji: status.emoji || '🎯',
       defaultDurationMinutes: Number(status.defaultDurationMinutes) || 60,

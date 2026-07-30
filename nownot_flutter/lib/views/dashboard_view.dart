@@ -7,6 +7,8 @@ import '../theme/app_theme.dart';
 import '../widgets/glass_container.dart';
 import '../widgets/active_status_card.dart';
 import 'status_editor_view.dart';
+import 'status_manager_view.dart';
+import 'messages_view.dart';
 import 'call_log_view.dart';
 import 'login_view.dart';
 
@@ -245,9 +247,13 @@ class _DashboardViewState extends State<DashboardView> {
         ],
       ),
 
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(16.0),
+      body: _selectedNavIndex == 1
+          ? const StatusManagerView()
+          : _selectedNavIndex == 2
+              ? const MessagesView()
+              : SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(16.0),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
@@ -270,13 +276,9 @@ class _DashboardViewState extends State<DashboardView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const SizedBox(height: 6),
-                          const Text(
+                          Text(
                             '🌙',
-                            style: TextStyle(
-                              fontSize: 32,
-                              inherit: false,
-                              fontFamilyFallback: ['Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji'],
-                            ),
+                            style: GoogleFonts.notoColorEmoji(fontSize: 32),
                           ),
                           const SizedBox(height: 10),
                           Text(
@@ -474,12 +476,7 @@ class _DashboardViewState extends State<DashboardView> {
     return InkWell(
       onTap: () {
         setState(() => _selectedNavIndex = index);
-        if (index == 1 || index == 2) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const StatusEditorView()),
-          );
-        } else if (index == 3) {
+        if (index == 3) {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const CallLogView()),
@@ -633,11 +630,7 @@ class _DashboardViewState extends State<DashboardView> {
             child: Center(
               child: Text(
                 avatarEmoji,
-                style: const TextStyle(
-                  fontSize: 16,
-                  inherit: false,
-                  fontFamilyFallback: ['Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji'],
-                ),
+                style: GoogleFonts.notoColorEmoji(fontSize: 16),
               ),
             ),
           ),

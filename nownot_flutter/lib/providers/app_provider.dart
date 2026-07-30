@@ -106,6 +106,49 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Update Group Message for Active/Default Status
+  Future<void> updateGroupMessage(String groupKey, String newMessage) async {
+    if (_activeStatus != null) {
+      final updatedGroupMsgs = Map<String, String>.from(_activeStatus!.status.groupMessages);
+      updatedGroupMsgs[groupKey] = newMessage;
+
+      final updatedStatus = StatusModel(
+        id: _activeStatus!.status.id,
+        name: _activeStatus!.status.name,
+        emoji: _activeStatus!.status.emoji,
+        defaultDurationMinutes: _activeStatus!.status.defaultDurationMinutes,
+        isSystem: _activeStatus!.status.isSystem,
+        groupMessages: updatedGroupMsgs,
+      );
+
+      _activeStatus = ActiveStatusModel(
+        status: updatedStatus,
+        startTimeMs: _activeStatus!.startTimeMs,
+        endTimeMs: _activeStatus!.endTimeMs,
+        isManual: _activeStatus!.isManual,
+      );
+
+      await _storage.saveActiveStatus(_activeStatus!);
+      await saveStatus(updatedStatus);
+    } else if (_statuses.isNotEmpty) {
+      final firstStatus = _statuses.first;
+      final updatedGroupMsgs = Map<String, String>.from(firstStatus.groupMessages);
+      updatedGroupMsgs[groupKey] = newMessage;
+
+      final updatedStatus = StatusModel(
+        id: firstStatus.id,
+        name: firstStatus.name,
+        emoji: firstStatus.emoji,
+        defaultDurationMinutes: firstStatus.defaultDurationMinutes,
+        isSystem: firstStatus.isSystem,
+        groupMessages: updatedGroupMsgs,
+      );
+
+      await saveStatus(updatedStatus);
+    }
+    notifyListeners();
+  }
+
   // Handle Missed Call Event
   Future<void> onMissedCallDetected({
     required String phoneNumber,

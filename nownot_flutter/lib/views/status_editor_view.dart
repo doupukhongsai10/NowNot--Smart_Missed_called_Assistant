@@ -20,6 +20,7 @@ class _StatusEditorViewState extends State<StatusEditorView> {
 
   late TextEditingController _nameController;
   late TextEditingController _emojiController;
+  late TextEditingController _durationController;
   late TextEditingController _familyMsgController;
   late TextEditingController _friendsMsgController;
   late TextEditingController _workMsgController;
@@ -31,6 +32,7 @@ class _StatusEditorViewState extends State<StatusEditorView> {
     final status = widget.statusToEdit;
     _nameController = TextEditingController(text: status?.name ?? '');
     _emojiController = TextEditingController(text: status?.emoji ?? '📱');
+    _durationController = TextEditingController(text: (status?.defaultDurationMinutes ?? 60).toString());
     _familyMsgController = TextEditingController(text: status?.groupMessages['Family'] ?? '');
     _friendsMsgController = TextEditingController(text: status?.groupMessages['Friends'] ?? '');
     _workMsgController = TextEditingController(text: status?.groupMessages['Work'] ?? '');
@@ -41,6 +43,7 @@ class _StatusEditorViewState extends State<StatusEditorView> {
   void dispose() {
     _nameController.dispose();
     _emojiController.dispose();
+    _durationController.dispose();
     _familyMsgController.dispose();
     _friendsMsgController.dispose();
     _workMsgController.dispose();
@@ -56,6 +59,8 @@ class _StatusEditorViewState extends State<StatusEditorView> {
         id: id,
         name: _nameController.text.trim(),
         emoji: _emojiController.text.trim(),
+        defaultDurationMinutes: int.tryParse(_durationController.text.trim()) ?? 60,
+        isSystem: widget.statusToEdit?.isSystem ?? false,
         groupMessages: {
           'Family': _familyMsgController.text.trim(),
           'Friends': _friendsMsgController.text.trim(),
@@ -97,34 +102,55 @@ class _StatusEditorViewState extends State<StatusEditorView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               GlassContainer(
-                child: Row(
+                child: Column(
                   children: [
-                    SizedBox(
-                      width: 60,
-                      child: TextFormField(
-                        controller: _emojiController,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.notoColorEmoji(fontSize: 24),
-                        decoration: InputDecoration(
-                          labelText: 'Emoji',
-                          labelStyle: GoogleFonts.inter(color: AppTheme.primaryLavender),
-                          border: const OutlineInputBorder(),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 60,
+                          child: TextFormField(
+                            controller: _emojiController,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.notoColorEmoji(fontSize: 24),
+                            decoration: InputDecoration(
+                              labelText: 'Emoji',
+                              labelStyle: GoogleFonts.inter(color: AppTheme.primaryLavender),
+                              border: const OutlineInputBorder(),
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _nameController,
+                            style: GoogleFonts.inter(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText: 'Status Name',
+                              hintText: 'e.g. Focus Mode',
+                              labelStyle: GoogleFonts.inter(color: AppTheme.primaryLavender),
+                              border: const OutlineInputBorder(),
+                            ),
+                            validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _nameController,
-                        style: GoogleFonts.inter(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: 'Status Name',
-                          hintText: 'e.g. Focus Mode',
-                          labelStyle: GoogleFonts.inter(color: AppTheme.primaryLavender),
-                          border: const OutlineInputBorder(),
-                        ),
-                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _durationController,
+                      keyboardType: TextInputType.number,
+                      style: GoogleFonts.inter(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Default Duration (minutes)',
+                        hintText: 'e.g. 60',
+                        labelStyle: GoogleFonts.inter(color: AppTheme.primaryLavender),
+                        border: const OutlineInputBorder(),
                       ),
+                      validator: (val) {
+                        if (val == null || val.isEmpty) return 'Required';
+                        if (int.tryParse(val) == null) return 'Must be a number';
+                        return null;
+                      },
                     ),
                   ],
                 ),

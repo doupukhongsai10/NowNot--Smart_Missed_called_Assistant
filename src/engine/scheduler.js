@@ -1,4 +1,5 @@
 import scheduleStore from '../store/scheduleStore';
+import statusStore from '../store/statusStore';
 import statusEngine from './statusEngine';
 
 /**
@@ -28,15 +29,39 @@ function findMatchingSchedule() {
   const currentDay = now.getDay();          // 0 = Sun … 6 = Sat
   const currentMins = now.getHours() * 60 + now.getMinutes();
 
-  return (
-    schedules.find(
-      (s) =>
-        s.enabled &&
-        s.days.includes(currentDay) &&
-        currentMins >= toMins(s.startTime) &&
-        currentMins < toMins(s.endTime)
-    ) || null
+  const routineMatch = schedules.find(
+    (s) =>
+      s.enabled &&
+      s.days.includes(currentDay) &&
+      currentMins >= toMins(s.startTime) &&
+      currentMins < toMins(s.endTime)
   );
+
+  if (routineMatch) return routineMatch;
+
+  // Also check custom statuses defined with time windows
+  const customStatuses = statusStore.getAll();
+  const statusMatch = customStatuses.find((s) => {
+    if (!s.startTime || !s.endTime || s.startTime === s.endTime || s.manualOnly) return false;
+    const startMins = toMins(s.startTime);
+    const endMins = toMins(s.endTime);
+    if (endMins > startMins) {
+      return currentMins >= startMins && currentMins < endMins;
+    }
+    // Overnight window
+    return currentMins >= startMins || currentMins < endMins;
+  });
+
+  if (statusMatch) {
+    return {
+      id: statusMatch.id,
+      statusId: statusMatch.id,
+      startTime: statusMatch.startTime,
+      endTime: statusMatch.endTime,
+    };
+  }
+
+  return null;
 }
 
 /**
@@ -74,11 +99,18 @@ function tick() {
 
   // ── Case 3: Nothing is active — activate matching schedule if any ──
   if (!active && matching) {
-    // Calculate remaining minutes in this window
+    // Calculate remaining minutes in this window (handling overnight windows)
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes();
+    const startMins = toMins(matching.startTime);
     const endMins = toMins(matching.endTime);
-    const remainingMins = endMins - currentMins;
+    let remainingMins = 0;
+
+    if (endMins > startMins) {
+      remainingMins = endMins - currentMins;
+    } else {
+      remainingMins = currentMins >= startMins ? (1440 - currentMins + endMins) : (endMins - currentMins);
+    }
 
     if (remainingMins <= 0) return 'idle';
 

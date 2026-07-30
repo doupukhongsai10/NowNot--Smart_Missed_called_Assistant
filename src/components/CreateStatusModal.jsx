@@ -355,7 +355,7 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
     // Also update global group messages so they display immediately on the Messages page
     messageStore.saveGlobalAll(messages);
 
-    // ── Auto-activate / Overwrite current active status if window or time collides ──────
+    // ── Auto-activate ONLY IF current wall-clock time is inside the time window right now ──────
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes();
     const startMins = toMins(startTime);
@@ -366,31 +366,25 @@ export default function CreateStatusModal({ onClose, onSave, initialStatus = nul
 
     if (startMins !== endMins) {
       if (endMins > startMins) {
+        // Standard same-day window (e.g. 09:00 - 17:00)
         isCurrentWindowActive = currentMins >= startMins && currentMins < endMins;
         remainingMins = endMins - currentMins;
       } else {
+        // Overnight window (e.g. 22:00 - 07:00)
         isCurrentWindowActive = currentMins >= startMins || currentMins < endMins;
         remainingMins = currentMins >= startMins ? (1440 - currentMins + endMins) : (endMins - currentMins);
       }
     }
 
-    // Check if new status window collides with currently running active status
-    let collidesWithActive = false;
-    if (currentActive) {
-      const activeStart = new Date(currentActive.activatedAt);
-      const activeEnd = new Date(currentActive.expiresAt);
-      const activeStartMins = activeStart.getHours() * 60 + activeStart.getMinutes();
-      const activeEndMins = activeEnd.getHours() * 60 + activeEnd.getMinutes();
-
-      collidesWithActive = timeWindowsOverlap(startMins, endMins, activeStartMins, activeEndMins);
-    }
-
-    // OVERWRITE: If current time is within new status window OR collides with current active status OR editing current active status
-    if (isCurrentWindowActive || collidesWithActive || currentActive?.statusId === targetStatusId) {
-      const durationToUse = remainingMins > 0 ? remainingMins : durationMinutes;
-      // Overwrite previous active status immediately via shared context activate!
-      activate(targetStatusId, durationToUse, 'schedule');
+    if (isCurrentWindowActive && remainingMins > 0) {
+      // Current time is WITHIN the window right now → activate/overwrite current status immediately!
+      activate(targetStatusId, remainingMins, 'schedule');
+    } else if (currentActive?.statusId === targetStatusId) {
+      // Editing the currently active status metadata (e.g. name, emoji)
+      statusEngine.updateActiveMetadata(targetStatusId, name.trim(), emoji);
+      refreshActiveStatus();
     } else {
+      // Future or inactive status → save without touching the current active status
       refreshActiveStatus();
     }
 
